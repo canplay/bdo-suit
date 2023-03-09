@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Document Version="2">
+    <Protection InputFileName="backend.exe" Options="499656" VMCodeSectionName=".???">
+        <Messages>
+            <Message Id="0">请勿使用调试器</Message>
+            <Message Id="1">无法在虚拟机内运行</Message>
+            <Message Id="2">文件损坏</Message>
+            <Message Id="3">需要序列号才能运行</Message>
+            <Message Id="4">无法在此电脑运行</Message>
+        </Messages>
+        <Folders />
+        <Procedures>
+            <Procedure MapAddress="EntryPoint" Options="0" />
+        </Procedures>
+        <Objects />
+    </Protection>
+    <DLLBox>
+        <Folders />
+    </DLLBox>
+    <Script />
+    <LicenseManager />
+</Document>
