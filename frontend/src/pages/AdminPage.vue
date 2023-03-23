@@ -1,4 +1,3 @@
-// admin,bce38c727eda4877b3e78a6f
 <template>
   <q-page>
     <q-card square>

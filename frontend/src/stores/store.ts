@@ -13,5 +13,6 @@ export const useStore = defineStore('global', {
       cash: 0,
       pearl: 0,
     },
+    admin: [] as any,
   }),
 });

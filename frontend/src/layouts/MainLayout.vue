@@ -40,6 +40,15 @@
 
         <div class="col-auto" style="width: 30px" />
 
+        <q-btn
+          v-if="store.user.familyname === 'WebAdmin'"
+          flat
+          label="管理"
+          to="/admin"
+        />
+
+        <div class="col-auto" style="width: 30px" />
+
         <q-select
           dark
           class="col-auto"

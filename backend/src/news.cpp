@@ -89,7 +89,7 @@ namespace api
 		time_t time = std::chrono::system_clock::to_time_t(now);
 		auto timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(time));
 
-		auto stmt = fmt::format("UPDATE [SA_BETA_WORLDDB_0002].[PaWebPublic].[news] SET [title] = N'{}', [date] = '{}', [author] = N'{}', [content] = N'{}', [update_date] = '{}', [update_user] = '{}', [update_id] = '{}', [delete] = {} WHERE [id] = '{}'", utf8ToGBK((*json)["title"].asString()), (*json)["date"].asString(), utf8ToGBK((*json)["author"].asString()), (*json)["content"].asString(), timestamp, (*json)["update_user"].asString(), (*json)["update_id"].asString(), (*json)["delete"].asInt(), (*json)["id"].asString());
+		auto stmt = fmt::format("UPDATE [SA_BETA_WORLDDB_0002].[PaWebPublic].[news] SET [title] = N'{}', [date] = '{}', [author] = N'{}', [content] = N'{}', [update_date] = '{}', [update_user] = '{}', [update_id] = '{}', [delete] = {} WHERE [id] = '{}'", utf8ToGBK((*json)["title"].asString()), (*json)["date"].asString(), utf8ToGBK((*json)["author"].asString()), (*json)["content"].asString(), timestamp, (*json)["update_user"].asString(), (*json)["update_id"].asString(), (*json)["delete"].asInt64(), (*json)["id"].asString());
 
 		spdlog::info(stmt);
 

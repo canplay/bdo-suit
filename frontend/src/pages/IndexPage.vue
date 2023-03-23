@@ -601,7 +601,7 @@ const dialog = ref({
       rowsPerPage: 10,
       sortBy: 'create_date',
       descending: true,
-    } as any,
+    } as QTableProps['pagination'],
     columns: [
       {
         name: 'name',

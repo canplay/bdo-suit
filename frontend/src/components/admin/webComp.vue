@@ -334,9 +334,9 @@ const table = ref({
       page: 1,
       rowsNumber: 0,
       rowsPerPage: 7,
-      sortBy: null,
+      sortBy: '',
       descending: true,
-    } as any,
+    } as QTableProps['pagination'],
     filter: '',
     columns: [
       {
@@ -416,9 +416,9 @@ const table = ref({
       page: 1,
       rowsNumber: 0,
       rowsPerPage: 7,
-      sortBy: null,
+      sortBy: '',
       descending: true,
-    } as any,
+    } as QTableProps['pagination'],
     filter: '',
     columns: [
       {
@@ -477,9 +477,9 @@ const table = ref({
       page: 1,
       rowsNumber: 0,
       rowsPerPage: 7,
-      sortBy: null,
+      sortBy: '',
       descending: true,
-    } as any,
+    } as QTableProps['pagination'],
     filter: '',
     columns: [
       {
@@ -592,7 +592,7 @@ const onNewsRequest = (props: any) => {
       {
         curPage: (page - 1) * rowsPerPage,
         maxPage: rowsPerPage === 0 ? rowsNumber : rowsPerPage,
-        sortBy: sortBy === null ? 'create_date' : sortBy,
+        sortBy: sortBy === '' ? 'create_date' : sortBy,
         descending: descending,
       },
       $q.cookies.get('canplay_token')
@@ -621,10 +621,10 @@ const onNewsRequest = (props: any) => {
         $q.notify('网络错误，请稍后重试');
       }
 
-      table.value.news.pagination.page = page;
-      table.value.news.pagination.rowsPerPage = rowsPerPage;
-      table.value.news.pagination.sortBy = sortBy;
-      table.value.news.pagination.descending = descending;
+      table.value.news.pagination!.page = page;
+      table.value.news.pagination!.rowsPerPage = rowsPerPage;
+      table.value.news.pagination!.sortBy = sortBy;
+      table.value.news.pagination!.descending = descending;
 
       $q.loading.hide();
       clearTimeout(time);
@@ -647,7 +647,7 @@ const onNewsQuery = () => {
   useFetch()
     .get(store.backend + '/api/news/count', $q.cookies.get('canplay_token'))
     .then((resp) => {
-      table.value.news.pagination.rowsNumber = parseInt(resp.data.msg);
+      table.value.news.pagination!.rowsNumber = parseInt(resp.data.msg);
       onNewsRequest({ pagination: table.value.news.pagination });
 
       $q.loading.hide();
@@ -678,7 +678,7 @@ const onLinkRequest = (props: any) => {
       {
         curPage: (page - 1) * rowsPerPage,
         maxPage: rowsPerPage === 0 ? rowsNumber : rowsPerPage,
-        sortBy: sortBy === null ? 'create_date' : sortBy,
+        sortBy: sortBy === '' ? 'create_date' : sortBy,
         descending: descending,
       },
       $q.cookies.get('canplay_token')
@@ -704,10 +704,10 @@ const onLinkRequest = (props: any) => {
         $q.notify('网络错误，请稍后重试');
       }
 
-      table.value.link.pagination.page = page;
-      table.value.link.pagination.rowsPerPage = rowsPerPage;
-      table.value.link.pagination.sortBy = sortBy;
-      table.value.link.pagination.descending = descending;
+      table.value.link.pagination!.page = page;
+      table.value.link.pagination!.rowsPerPage = rowsPerPage;
+      table.value.link.pagination!.sortBy = sortBy;
+      table.value.link.pagination!.descending = descending;
 
       $q.loading.hide();
       clearTimeout(time);
@@ -730,7 +730,7 @@ const onLinkQuery = () => {
   useFetch()
     .get(store.backend + '/api/link/count', $q.cookies.get('canplay_token'))
     .then((resp) => {
-      table.value.link.pagination.rowsNumber = parseInt(resp.data.msg);
+      table.value.link.pagination!.rowsNumber = parseInt(resp.data.msg);
       onLinkRequest({ pagination: table.value.link.pagination });
 
       $q.loading.hide();
@@ -761,7 +761,7 @@ const onSlideRequest = (props: any) => {
       {
         curPage: (page - 1) * rowsPerPage,
         maxPage: rowsPerPage === 0 ? rowsNumber : rowsPerPage,
-        sortBy: sortBy === null ? 'create_date' : sortBy,
+        sortBy: sortBy === '' ? 'create_date' : sortBy,
         descending: descending,
       },
       $q.cookies.get('canplay_token')
@@ -789,10 +789,10 @@ const onSlideRequest = (props: any) => {
         $q.notify('网络错误，请稍后重试');
       }
 
-      table.value.slide.pagination.page = page;
-      table.value.slide.pagination.rowsPerPage = rowsPerPage;
-      table.value.slide.pagination.sortBy = sortBy;
-      table.value.slide.pagination.descending = descending;
+      table.value.slide.pagination!.page = page;
+      table.value.slide.pagination!.rowsPerPage = rowsPerPage;
+      table.value.slide.pagination!.sortBy = sortBy;
+      table.value.slide.pagination!.descending = descending;
 
       $q.loading.hide();
       clearTimeout(time);
@@ -815,7 +815,7 @@ const onSlideQuery = () => {
   useFetch()
     .get(store.backend + '/api/slide/count', $q.cookies.get('canplay_token'))
     .then((resp) => {
-      table.value.slide.pagination.rowsNumber = parseInt(resp.data.msg);
+      table.value.slide.pagination!.rowsNumber = parseInt(resp.data.msg);
       onSlideRequest({ pagination: table.value.slide.pagination });
 
       $q.loading.hide();

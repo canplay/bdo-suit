@@ -39,7 +39,7 @@ export default route(function (/* { store, ssrContext } */) {
   Router.beforeEach((to, from, next) => {
     const store = useStore();
 
-    if (to.path != '/' && store.user.familyname != 'WebAdmin') {
+    if (to.path != '/' && store.admin.includes(store.user.familyname)) {
       next('/');
     } else next();
   });

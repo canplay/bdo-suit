@@ -78,38 +78,41 @@ namespace api
 					auto r2 = MsSql::exec(stmt2);
 					r2.next();
 
-					auto stmt3 = fmt::format("INSERT INTO [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblBriefUserInformation] ([_registerDate], [_userNo], [_userId], [_userNickname], ) VALUES ('{}', {}, N'{},{}', N'{}');", timestamp, r2.get<INT64>("_userNo", 0), (*json)["username"].asString(), (*json)["password"].asString(), nickname);
-					auto r3 = MsSql::exec(stmt3);
+					if (r2.rows() != 0)
+					{
+						Json::Value info;
 
-					Json::Value info;
+						info["registerDate"] = r2.get<std::string>("_registerDate", "");
+						info["valid"] = r2.get<std::string>("_isValid", "");
+						info["userNo"] = r2.get<INT64>("_userNo", 0);
+						info["userId"] = r2.get<std::string>("_userId", "");
+						info["userNickname"] = r2.get<std::string>("_userNickname", "");
+						info["lastLoginTime"] = r2.get<std::string>("_lastLoginTime", "");
+						info["lastLogoutTime"] = r2.get<std::string>("_lastLogoutTime", "");
+						info["totalPlayTime"] = r2.get<INT64>("_totalPlayTime", 0);
+						info["membershipType"] = r2.get<INT64>("_membershipType", 0);
+						info["pcroom"] = r2.get<INT64>("_isPcRoom", 0);
 
-					info["registerDate"] = r2.get<std::string>("_registerDate", "");
-					info["valid"] = r2.get<std::string>("_isValid", "");
-					info["userNo"] = r2.get<INT64>("_userNo", 0);
-					info["userId"] = r2.get<std::string>("_userId", "");
-					info["userNickname"] = r2.get<std::string>("_userNickname", "");
-					info["lastLoginTime"] = r2.get<std::string>("_lastLoginTime", "");
-					info["lastLogoutTime"] = r2.get<std::string>("_lastLogoutTime", "");
-					info["totalPlayTime"] = r2.get<INT64>("_totalPlayTime", 0);
-					info["membershipType"] = r2.get<INT64>("_membershipType", 0);
-					info["pcroom"] = r2.get<INT64>("_isPcRoom", 0);
+						jwt jwtGenerated = jwt::generateToken(
+							{
+								{"id", picojson::value(info["userNo"].asString())},
+							},
+							(*json).isMember("remember") && (*json)["remember"].asBool());
+						std::int64_t jwtExpiration = jwtGenerated.getExpiration();
+						info["token"] = jwtGenerated.getToken();
+						info["expiresIn"] =
+							jwtExpiration -
+							std::chrono::duration_cast<std::chrono::seconds>(
+								std::chrono::system_clock::now().time_since_epoch())
+							.count();
+						info["expiresAt"] = jwtExpiration;
 
-					jwt jwtGenerated = jwt::generateToken(
-						{
-							{"id", picojson::value(info["userNo"].asString())},
-						},
-						(*json).isMember("remember") && (*json)["remember"].asBool());
-					std::int64_t jwtExpiration = jwtGenerated.getExpiration();
-					info["token"] = jwtGenerated.getToken();
-					info["expiresIn"] =
-						jwtExpiration -
-						std::chrono::duration_cast<std::chrono::seconds>(
-							std::chrono::system_clock::now().time_since_epoch())
-						.count();
-					info["expiresAt"] = jwtExpiration;
+						ret["msg"] = info;
+						ret["status"] = 1;
+					}
 
-					ret["msg"] = info;
-					ret["status"] = 1;
+					ret["msg"] = "signup error";
+					ret["status"] = 0;
 				}
 				else
 				{
@@ -394,9 +397,9 @@ namespace api
 		time_t time = std::chrono::system_clock::to_time_t(now);
 		auto timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(time));
 
-		auto stmt1 = fmt::format("UPDATE [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblUserInformation] SET [_isValid] = '{}', [_userId] = N'{},{}', [_userNickname] = N'{}', [_isPcRoom] = {}, [_membershipType] = {} WHERE [_userNo] = {};", (*json)["isValid"].asInt(), (*json)["username"].asString(), (*json)["password"].asString(), (*json)["userNickname"].asString(), (*json)["pcroom"].asInt(), (*json)["membershipType"].asInt(), (*json)["userNo"].asInt());
+		auto stmt1 = fmt::format("UPDATE [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblUserInformation] SET [_isValid] = '{}', [_userId] = N'{},{}', [_userNickname] = N'{}', [_isPcRoom] = {}, [_membershipType] = {} WHERE [_userNo] = {}", (*json)["isValid"].asInt64(), (*json)["username"].asString(), (*json)["password"].asString(), (*json)["userNickname"].asString(), (*json)["pcroom"].asInt64(), (*json)["membershipType"].asInt64(), (*json)["userNo"].asInt64());
 
-		auto stmt2 = fmt::format("UPDATE [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblBriefUserInformation] SET [_userId] = N'{},{}', [_userNickname] = N'{}' WHERE [_userNo] = {};", (*json)["username"].asString(), (*json)["password"].asString(), (*json)["userNickname"].asString(), (*json)["userNo"].asInt());
+		auto stmt2 = fmt::format("UPDATE [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblBriefUserInformation] SET [_userId] = N'{},{}', [_userNickname] = N'{}' WHERE [_userNo] = {}", (*json)["username"].asString(), (*json)["password"].asString(), (*json)["userNickname"].asString(), (*json)["userNo"].asInt64());
 
 		Json::Value ret;
 
@@ -450,7 +453,7 @@ namespace api
 		time_t time = std::chrono::system_clock::to_time_t(now);
 		auto timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(time));
 
-		auto stmt = fmt::format("UPDATE [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblCharacterInformation] SET [_characterName] = N'{}', [_currentPositionX] = {}, [_currentPositionY] = {}, [_currentPositionZ] = {}, [_returnPositionX] = {}, [_returnPositionY] = {}, [_returnPositionZ] = {}, [_level] = {}, [_experience] = {}, [_skillPointLevel] = {}, [_skillPointExperience] = {}, [_remainedSkillPoint] = {}, [_aquiredSkillPoint] = {}, [_tendency] = {}, [_hp] = {}, [_mp] = {}, [_sp] = {}, [_wp] = {}, [_inventorySlotCount] = {}, [_titleKey] = {}, [_killRewardCount] = {}, [_enchantFailCount] = {}, [_offenceValue] = {}, [_defenceValue] = {}, [_awakenValue] = {}, [_variedWeight] = {} WHERE [_characterNo] = {}", (*json)["characterName"].asString(), (*json)["currentPositionX"].asInt(), (*json)["currentPositionY"].asInt(), (*json)["currentPositionZ"].asInt(), (*json)["currentPositionX"].asInt(), (*json)["currentPositionY"].asInt(), (*json)["currentPositionZ"].asInt(), (*json)["level"].asInt(), (*json)["experience"].asInt(), (*json)["skillPointLevel"].asInt(), (*json)["skillPointExperience"].asInt(), (*json)["remainedSkillPoint"].asInt(), (*json)["aquiredSkillPoint"].asInt(), (*json)["tendency"].asInt(), (*json)["hp"].asInt(), (*json)["mp"].asInt(), (*json)["sp"].asInt(), (*json)["wp"].asInt(), (*json)["inventorySlotCount"].asInt(), (*json)["titleKey"].asInt(), (*json)["killRewardCount"].asInt(), (*json)["enchantFailCount"].asInt(), (*json)["offenceValue"].asInt(), (*json)["defenceValue"].asInt(), (*json)["awakenValue"].asInt(), (*json)["variedWeight"].asInt(), (*json)["characterNo"].asInt());
+		auto stmt = fmt::format("UPDATE [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblCharacterInformation] SET [_characterName] = N'{}', [_currentPositionX] = {}, [_currentPositionY] = {}, [_currentPositionZ] = {}, [_returnPositionX] = {}, [_returnPositionY] = {}, [_returnPositionZ] = {}, [_level] = {}, [_experience] = {}, [_skillPointLevel] = {}, [_skillPointExperience] = {}, [_remainedSkillPoint] = {}, [_aquiredSkillPoint] = {}, [_tendency] = {}, [_hp] = {}, [_mp] = {}, [_sp] = {}, [_wp] = {}, [_inventorySlotCount] = {}, [_titleKey] = {}, [_killRewardCount] = {}, [_enchantFailCount] = {}, [_offenceValue] = {}, [_defenceValue] = {}, [_awakenValue] = {}, [_variedWeight] = {} WHERE [_characterNo] = {}", (*json)["characterName"].asString(), (*json)["currentPositionX"].asInt64(), (*json)["currentPositionY"].asInt64(), (*json)["currentPositionZ"].asInt64(), (*json)["currentPositionX"].asInt64(), (*json)["currentPositionY"].asInt64(), (*json)["currentPositionZ"].asInt64(), (*json)["level"].asInt64(), (*json)["experience"].asInt64(), (*json)["skillPointLevel"].asInt64(), (*json)["skillPointExperience"].asInt64(), (*json)["remainedSkillPoint"].asInt64(), (*json)["aquiredSkillPoint"].asInt64(), (*json)["tendency"].asInt64(), (*json)["hp"].asInt64(), (*json)["mp"].asInt64(), (*json)["sp"].asInt64(), (*json)["wp"].asInt64(), (*json)["inventorySlotCount"].asInt64(), (*json)["titleKey"].asInt64(), (*json)["killRewardCount"].asInt64(), (*json)["enchantFailCount"].asInt64(), (*json)["offenceValue"].asInt64(), (*json)["defenceValue"].asInt64(), (*json)["awakenValue"].asInt64(), (*json)["variedWeight"].asInt64(), (*json)["characterNo"].asInt64());
 
 		Json::Value ret;
 
@@ -500,21 +503,23 @@ namespace api
 		time_t time = std::chrono::system_clock::to_time_t(now);
 		auto timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(time));
 
-		std::string expirationDate_col = "[_expirationDate],";
+		std::string expirationDate_col = "[_expirationDate], ";
 		std::string expirationDate_val = (*json)["expirationDate"].asString();
-		if ((*json)["expirationDate"].asString().empty())
+		if ((*json)["expirationDate"].asString() == "")
 		{
 			expirationDate_col = expirationDate_val = "";
 		}
 
-		auto stmt = fmt::format("INSERT INTO [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblMail] ([_registerDate], [_senderName], [_senderUserNo], [_receiverName], [_receiverUserNo], [_title], [_contents], [_mailType], [_variousNo], [_enchantLevel], [_itemCount], {} [_webItemType], [_chargeNo]) VALUES ('{}', N'{}', {}, N'{}', {}, N'{}', N'{}', {}, {}, {}, {}, ''", expirationDate_col, timestamp, (*json)["senderName"].asString().empty() ? "GM" : (*json)["senderName"].asString(), (*json)["senderUserNo"].asInt(), (*json)["receiverName"].asString(), (*json)["receiverUserNo"].asInt(), (*json)["title"].asString(), (*json)["contents"].asString(), (*json)["mailType"].asInt(), (*json)["variousNo"].asInt(), (*json)["enchantLevel"].asInt(), (*json)["itemCount"].asInt(), (*json)["webItemType"].asInt());
+		auto stmt = fmt::format("INSERT INTO [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblMail] ({}[_registerDate], [_senderName], [_senderUserNo], [_receiverName], [_receiverUserNo], [_title], [_contents], [_mailType], [_variousNo], [_enchantLevel], [_itemCount], [_webItemType], [_chargeNo]) VALUES ('{}', N'{}', {}, N'{}', {}, N'{}', N'{}', {}, {}, {}, {}, {}, ''", expirationDate_col, timestamp, (*json)["senderName"].asString() == "" ? "GM" : (*json)["senderName"].asString(), (*json)["senderUserNo"].asInt64(), (*json)["receiverName"].asString(), (*json)["receiverUserNo"].asInt64(), (*json)["title"].asString(), (*json)["contents"].asString(), (*json)["mailType"].asInt64(), (*json)["variousNo"].asInt64(), (*json)["enchantLevel"].asInt64(), (*json)["itemCount"].asInt64(), (*json)["webItemType"].asInt64());
 
-		if (!(*json)["expirationDate"].asString().empty())
+		if ((*json)["expirationDate"].asString() != "")
 		{
-			stmt = fmt::format("{} '{}'", stmt, expirationDate_val);
+			stmt = fmt::format("{}, '{}'", stmt, expirationDate_val);
 		}
 
-		stmt = fmt::format("{});", stmt);
+		stmt = fmt::format("{})", stmt);
+
+		spdlog::info(stmt);
 
 		Json::Value ret;
 
@@ -543,12 +548,13 @@ namespace api
 		callback(HttpResponse::newHttpJsonResponse(ret));
 	}
 
-	void User::admin(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const
+	void User::admin(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, const std::string& type, const std::string& method) const
 	{
+		Json::Value ret;
+
 		std::shared_ptr<Json::Value> json = req->getJsonObject();
 		if (!json)
 		{
-			Json::Value ret;
 			ret["msg"] = "error";
 			ret["status"] = 0;
 			return callback(HttpResponse::newHttpJsonResponse(ret));
@@ -558,30 +564,224 @@ namespace api
 		time_t time = std::chrono::system_clock::to_time_t(now);
 		auto timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(time));
 
-		auto stmt = fmt::format("INSERT INTO [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblRoleGroupMember] ([_UserNo], [_roleGroupNo], [_macAddress], [_IpAddress], [_password]) VALUES('{}', '1', '{}', '127.0.0.1', '{}');", (*json)["userNo"].asInt(), (*json)["mac"].asString(), (*json)["password"].asString());
+		std::string stmt = "";
 
-		Json::Value ret;
-
-		try
+		if (method == "count")
 		{
-			auto r = MsSql::exec(stmt);
-
-			if (r.affected_rows() == 1)
+			if (type == "ingame")
 			{
-				ret["msg"] = "ok";
-				ret["status"] = 1;
+				stmt = fmt::format("SELECT COUNT(_UserNo) FROM [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblRoleGroupMember]");
 			}
 			else
 			{
-				ret["msg"] = "admin add error";
+				stmt = fmt::format("SELECT COUNT(id) FROM [SA_BETA_WORLDDB_0002].[PaWebPublic].[admin]");
+			}
+
+			try
+			{
+				auto r = MsSql::exec(stmt);
+
+				if (r.rows() > 0)
+				{
+					ret["msg"] = r.rows();
+					ret["status"] = 1;
+				}
+				else
+				{
+					ret["msg"] = "admin get count error";
+					ret["status"] = 0;
+				}
+			}
+			catch (const std::exception& e)
+			{
+				spdlog::warn("admin get count error: {}", e.what());
+				ret["msg"] = e.what();
 				ret["status"] = 0;
 			}
+
+			return callback(HttpResponse::newHttpJsonResponse(ret));
 		}
-		catch (const std::exception& e)
+
+		switch (req->getMethod())
 		{
-			spdlog::warn("admin add error: {}", e.what());
-			ret["msg"] = e.what();
-			ret["status"] = 0;
+			case Get:
+				if (type == "ingame")
+				{
+					stmt = fmt::format("SELECT TOP {} * FROM [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblRoleGroupMember] WHERE _UserNo NOT IN(SELECT TOP {} _UserNo FROM [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblRoleGroupMember]", (*json)["maxPage"].asInt64(), (*json)["curPage"].asInt64());
+
+					if ((*json)["sortBy"].asString() != "")
+					{
+						stmt = fmt::format("{} ORDER BY [{}] DESC) ORDER BY [{}]", stmt, (*json)["sortBy"].asString(), (*json)["sortBy"].asString());
+
+						if ((*json)["descending"].asBool())
+							stmt = fmt::format("{} DESC", stmt);
+						else
+							stmt = fmt::format("{} ASC", stmt);
+					}
+					else
+						stmt = fmt::format("{})", stmt);
+
+					try
+					{
+						auto r = MsSql::exec(stmt);
+
+						if (r.rows() > 0)
+						{
+							Json::Value infos;
+
+							while (r.next())
+							{
+								Json::Value info;
+								info["UserNo"] = r.get<std::string>("_UserNo", "");
+								info["roleGroupNo"] = r.get<std::string>("_roleGroupNo", "");
+								info["macAddress"] = r.get<std::string>("_macAddress", "");
+								info["IpAddress"] = r.get<std::string>("_IpAddress", "");
+								info["password"] = r.get<std::string>("_password", "");
+								infos.append(info);
+							}
+
+							ret["msg"] = infos;
+							ret["status"] = 1;
+						}
+						else
+						{
+							ret["msg"] = "admin get error";
+							ret["status"] = 0;
+						}
+					}
+					catch (const std::exception& e)
+					{
+						spdlog::warn("admin get error: {}", e.what());
+						ret["msg"] = e.what();
+						ret["status"] = 0;
+					}
+				}
+				else
+				{
+					stmt = fmt::format("SELECT TOP {} * FROM [SA_BETA_WORLDDB_0002].[PaWebPublic].[admin] WHERE id NOT IN(SELECT TOP {} id FROM [SA_BETA_WORLDDB_0002].[PaWebPublic].[admin]", (*json)["maxPage"].asInt64(), (*json)["curPage"].asInt64());
+
+					if ((*json)["sortBy"].asString() != "")
+					{
+						stmt = fmt::format("{} ORDER BY [{}] DESC) ORDER BY [{}]", stmt, (*json)["sortBy"].asString(), (*json)["sortBy"].asString());
+
+						if ((*json)["descending"].asBool())
+							stmt = fmt::format("{} DESC", stmt);
+						else
+							stmt = fmt::format("{} ASC", stmt);
+					}
+					else
+						stmt = fmt::format("{})", stmt);
+
+					try
+					{
+						auto r = MsSql::exec(stmt);
+
+						if (r.rows() > 0)
+						{
+							Json::Value infos;
+
+							while (r.next())
+							{
+								Json::Value info;
+								info["id"] = r.get<std::string>("id", "");
+								info["userno"] = r.get<std::string>("userNo", "");
+								info["familyname"] = r.get<std::string>("userNickname", "");
+								info["create_date"] = r.get<std::string>("create_date", "");
+								info["create_user"] = r.get<std::string>("create_user", "");
+								info["create_id"] = r.get<std::string>("create_id", "");
+								info["update_date"] = r.get<std::string>("update_date", "");
+								info["update_user"] = r.get<std::string>("update_user", "");
+								info["update_id"] = r.get<std::string>("update_id", "");
+								infos.append(info);
+							}
+
+							ret["msg"] = infos;
+							ret["status"] = 1;
+						}
+						else
+						{
+							ret["msg"] = "admin get error";
+							ret["status"] = 0;
+						}
+					}
+					catch (const std::exception& e)
+					{
+						spdlog::warn("admin get error: {}", e.what());
+						ret["msg"] = e.what();
+						ret["status"] = 0;
+					}
+				}
+				break;
+			case Put:
+				if (type == "ingame")
+				{
+					stmt = fmt::format("INSERT INTO [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblRoleGroupMember] ([_UserNo], [_roleGroupNo], [_macAddress], [_IpAddress], [_password]) VALUES('{}', '1', '{}', '127.0.0.1', '{}')", (*json)["userNo"].asInt64(), (*json)["mac"].asString(), (*json)["password"].asString());
+				}
+				else
+				{
+					stmt = fmt::format("INSERT INTO [SA_BETA_WORLDDB_0002].[PaWebPublic].[admin] ([id], [userNo], [userNickname], [create_date], [create_user], [create_id], [update_date], [update_user], [update_id]) VALUES('{}', '{},{}', '{}', '{}', '{}')", uuidSimple(), (*json)["username"].asString(), (*json)["password"].asString(), (*json)["familyname"].asString(), timestamp, (*json)["create_user"].asString(), (*json)["create_id"].asString(), timestamp, (*json)["update_user"].asString(), (*json)["update_id"].asString());
+				}
+
+				try
+				{
+					auto r = MsSql::exec(stmt);
+
+					if (r.affected_rows() == 1)
+					{
+						ret["msg"] = "ok";
+						ret["status"] = 1;
+					}
+					else
+					{
+						ret["msg"] = "admin put error";
+						ret["status"] = 0;
+					}
+				}
+				catch (const std::exception& e)
+				{
+					spdlog::warn("admin put error: {}", e.what());
+					ret["msg"] = e.what();
+					ret["status"] = 0;
+				}
+				break;
+			case Post:
+				break;
+			case Delete:
+				if (type == "ingame")
+				{
+					stmt = fmt::format("DELETE FROM [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblRoleGroupMember] WHERE _UserNo = '{}'", (*json)["userNo"].asInt64());
+				}
+				else
+				{
+					stmt = fmt::format("DELETE FROM [SA_BETA_WORLDDB_0002].[PaWebPublic].[admin] WHERE id = '{}'", (*json)["id"].asString());
+				}
+
+				try
+				{
+					auto r = MsSql::exec(stmt);
+
+					if (r.affected_rows() == 1)
+					{
+						ret["msg"] = "ok";
+						ret["status"] = 1;
+					}
+					else
+					{
+						ret["msg"] = "admin put error";
+						ret["status"] = 0;
+					}
+				}
+				catch (const std::exception& e)
+				{
+					spdlog::warn("admin put error: {}", e.what());
+					ret["msg"] = e.what();
+					ret["status"] = 0;
+				}
+				break;
+			default:
+				ret["msg"] = "admin set no method";
+				ret["status"] = 0;
+				break;
 		}
 
 		callback(HttpResponse::newHttpJsonResponse(ret));
@@ -602,7 +802,7 @@ namespace api
 		time_t time = std::chrono::system_clock::to_time_t(now);
 		auto timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(time));
 
-		auto stmt = fmt::format("INSERT INTO [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblBlockedChat] ([_registerDate], [_userNo], [_endDate], [_reasonMemo]) VALUES ('{}', {}, '{}', N'{}');", timestamp, (*json)["userNo"].asInt(), (*json)["endDate"].asString(), (*json)["reasonMemo"].asString());
+		auto stmt = fmt::format("INSERT INTO [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblBlockedChat] ([_registerDate], [_userNo], [_endDate], [_reasonMemo]) VALUES ('{}', {}, '{}', N'{}')", timestamp, (*json)["userNo"].asInt64(), (*json)["endDate"].asString(), (*json)["reasonMemo"].asString());
 
 		Json::Value ret;
 
@@ -646,7 +846,7 @@ namespace api
 		time_t time = std::chrono::system_clock::to_time_t(now);
 		auto timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(time));
 
-		auto stmt = fmt::format("INSERT INTO [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblBlockedUser] ([_registerDate], [_userNo], [_endDate], [_blockCode], [_operationMemo]) VALUES ('{}', {}, '{}', {}, N'{}');", timestamp, (*json)["userNo"].asInt(), (*json)["endDate"].asString(), (*json)["blockCode"].asInt(), (*json)["reasonMemo"].asString());
+		auto stmt = fmt::format("INSERT INTO [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblBlockedUser] ([_registerDate], [_userNo], [_endDate], [_blockCode], [_operationMemo]) VALUES ('{}', {}, '{}', {}, N'{}')", timestamp, (*json)["userNo"].asInt64(), (*json)["endDate"].asString(), (*json)["blockCode"].asInt64(), (*json)["reasonMemo"].asString());
 
 		Json::Value ret;
 
@@ -690,7 +890,7 @@ namespace api
 		time_t time = std::chrono::system_clock::to_time_t(now);
 		auto timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(time));
 
-		auto stmt = fmt::format("INSERT INTO [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblBlockedIP] ([_registerDate], [_startIP], [_bigintStartIP], [_endIP], [_bigintEndIP], [_blockCode], [_operationMemo]) VALUES ('{}', N'{}', {}, N'{}', {}, {}, N'{}');", timestamp, (*json)["startIP"].asString(), (*json)["intStartIP"].asInt(), (*json)["endIP"].asString(), (*json)["intEndIP"].asInt(), (*json)["blockCode"].asInt(), (*json)["operationMemo"].asString());
+		auto stmt = fmt::format("INSERT INTO [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblBlockedIP] ([_registerDate], [_startIP], [_bigintStartIP], [_endIP], [_bigintEndIP], [_blockCode], [_operationMemo]) VALUES ('{}', N'{}', {}, N'{}', {}, {}, N'{}')", timestamp, (*json)["startIP"].asString(), (*json)["intStartIP"].asInt64(), (*json)["endIP"].asString(), (*json)["intEndIP"].asInt64(), (*json)["blockCode"].asInt64(), (*json)["operationMemo"].asString());
 
 		Json::Value ret;
 

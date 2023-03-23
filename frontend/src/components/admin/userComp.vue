@@ -18,16 +18,6 @@
 
         <q-btn
           class="col-1"
-          color="info"
-          label="设置GM"
-          :disable="table.user.selected.length === 0"
-          @click="userAction('gm')"
-        />
-
-        <div class="col-auto" style="width: 8px" />
-
-        <q-btn
-          class="col-1"
           color="secondary"
           label="发送邮件"
           :disable="table.user.selected.length === 0"
@@ -364,9 +354,9 @@ const table = ref({
       page: 1,
       rowsNumber: 0,
       rowsPerPage: 7,
-      sortBy: null,
+      sortBy: '',
       descending: true,
-    } as any,
+    } as QTableProps['pagination'],
     filter: '',
     selected: ref([] as any),
     columns: [
@@ -465,9 +455,9 @@ const dialog = ref({
         page: 1,
         rowsNumber: 0,
         rowsPerPage: 7,
-        sortBy: null,
+        sortBy: '',
         descending: true,
-      } as any,
+      } as QTableProps['pagination'],
       filter: '',
       columns: [
         {
@@ -665,17 +655,17 @@ const dialog = ref({
   },
   mail: {
     show: false,
-    senderName: '',
-    senderUserNo: 0,
+    senderName: 'GM',
+    senderUserNo: '0',
     receiverName: '',
-    receiverUserNo: -1,
-    title: '',
-    contents: '',
-    mailType: 0,
-    variousNo: -1,
-    enchantLevel: 0,
-    itemCount: 0,
-    webItemType: 0,
+    receiverUserNo: '-1',
+    title: '测试邮件',
+    contents: '测试邮件内容',
+    mailType: '0',
+    variousNo: '-1',
+    enchantLevel: '0',
+    itemCount: '0',
+    webItemType: '0',
   },
 });
 
@@ -698,7 +688,7 @@ const onRequest = (props: any) => {
       {
         curPage: (page - 1) * rowsPerPage,
         maxPage: rowsPerPage === 0 ? rowsNumber : rowsPerPage,
-        sortBy: sortBy === null ? 'userNo' : sortBy,
+        sortBy: sortBy === '' ? 'userNo' : sortBy,
         descending: descending,
       },
       $q.cookies.get('canplay_token')
@@ -729,10 +719,10 @@ const onRequest = (props: any) => {
         $q.notify('网络错误，请稍后重试');
       }
 
-      table.value.user.pagination.page = page;
-      table.value.user.pagination.rowsPerPage = rowsPerPage;
-      table.value.user.pagination.sortBy = sortBy;
-      table.value.user.pagination.descending = descending;
+      table.value.user.pagination!.page = page;
+      table.value.user.pagination!.rowsPerPage = rowsPerPage;
+      table.value.user.pagination!.sortBy = sortBy;
+      table.value.user.pagination!.descending = descending;
 
       $q.loading.hide();
       clearTimeout(time);
@@ -755,7 +745,7 @@ const onQuery = () => {
   useFetch()
     .get(store.backend + '/api/user/count', $q.cookies.get('canplay_token'))
     .then((resp) => {
-      table.value.user.pagination.rowsNumber = parseInt(resp.data.msg);
+      table.value.user.pagination!.rowsNumber = parseInt(resp.data.msg);
       onRequest({ pagination: table.value.user.pagination });
 
       $q.loading.hide();
@@ -801,23 +791,24 @@ const onSendMail = () => {
 
   if (
     dialog.value.mail.receiverName != '' ||
-    dialog.value.mail.receiverUserNo != -1
+    dialog.value.mail.receiverUserNo != '-1'
   ) {
     useFetch()
       .post(
         store.backend + '/api/user/mail',
         {
           senderName: dialog.value.mail.senderName,
-          senderUserNo: dialog.value.mail.senderUserNo,
+          senderUserNo: parseInt(dialog.value.mail.senderUserNo),
           receiverName: dialog.value.mail.receiverName,
-          receiverUserNo: dialog.value.mail.receiverUserNo,
+          receiverUserNo: parseInt(dialog.value.mail.receiverUserNo),
           title: dialog.value.mail.title,
           contents: dialog.value.mail.contents,
-          mailType: dialog.value.mail.mailType,
-          variousNo: dialog.value.mail.variousNo,
-          enchantLevel: dialog.value.mail.enchantLevel,
-          itemCount: dialog.value.mail.itemCount,
-          webItemType: dialog.value.mail.webItemType,
+          mailType: parseInt(dialog.value.mail.mailType),
+          variousNo: parseInt(dialog.value.mail.variousNo),
+          enchantLevel: parseInt(dialog.value.mail.enchantLevel),
+          itemCount: parseInt(dialog.value.mail.itemCount),
+          webItemType: parseInt(dialog.value.mail.webItemType),
+          expirationDate: '',
         },
         $q.cookies.get('canplay_token')
       )
@@ -825,9 +816,14 @@ const onSendMail = () => {
         if (resp.data.status === 1) {
           $q.notify('发送邮件成功');
         }
+
+        $q.loading.hide();
+        clearTimeout(time);
       })
       .catch(() => {
         $q.notify('网络错误，请稍后重试');
+        $q.loading.hide();
+        clearTimeout(time);
       });
   } else {
     for (let index = 0; index < table.value.user.selected.length; index++) {
@@ -838,16 +834,17 @@ const onSendMail = () => {
           store.backend + '/api/user/mail',
           {
             senderName: dialog.value.mail.senderName,
-            senderUserNo: dialog.value.mail.senderUserNo,
+            senderUserNo: parseInt(dialog.value.mail.senderUserNo),
             receiverName: element.userNickname,
-            receiverUserNo: element.userNo,
+            receiverUserNo: parseInt(element.userNo),
             title: dialog.value.mail.title,
             contents: dialog.value.mail.contents,
-            mailType: dialog.value.mail.mailType,
-            variousNo: dialog.value.mail.variousNo,
-            enchantLevel: dialog.value.mail.enchantLevel,
-            itemCount: dialog.value.mail.itemCount,
-            webItemType: dialog.value.mail.webItemType,
+            mailType: parseInt(dialog.value.mail.mailType),
+            variousNo: parseInt(dialog.value.mail.variousNo),
+            enchantLevel: parseInt(dialog.value.mail.enchantLevel),
+            itemCount: parseInt(dialog.value.mail.itemCount),
+            webItemType: parseInt(dialog.value.mail.webItemType),
+            expirationDate: '',
           },
           $q.cookies.get('canplay_token')
         )
@@ -855,15 +852,27 @@ const onSendMail = () => {
           if (resp.data.status === 1) {
             $q.notify('发送邮件成功');
           }
+
+          $q.loading.hide();
+          clearTimeout(time);
         })
         .catch(() => {
           $q.notify('网络错误，请稍后重试');
+          $q.loading.hide();
+          clearTimeout(time);
         });
     }
   }
 };
 
 const onSave = () => {
+  let time = setTimeout(() => {
+    $q.loading.hide();
+    clearTimeout(time);
+  }, 120000);
+
+  $q.loading.show();
+
   useFetch()
     .post(
       store.backend + '/api/user/update',
@@ -929,35 +938,80 @@ const onSave = () => {
             });
         }
       }
+
+      $q.loading.hide();
+      clearTimeout(time);
     })
     .catch(() => {
       $q.notify('网络错误，请稍后重试');
+
+      $q.loading.hide();
+      clearTimeout(time);
     });
 };
 
 const userAction = (val: string) => {
   switch (val) {
+    // case 'gm':
+    //   for (let index = 0; index < table.value.user.selected.length; index++) {
+    //     const element = table.value.user.selected[index];
+    //     useFetch()
+    //       .post(
+    //         store.backend + '/api/user/admin',
+    //         {
+    //           userNo: element.userNo,
+    //           mac: '00:00:00:00:00:00',
+    //           password: element.userId.split(',')[1],
+    //         },
+    //         $q.cookies.get('canplay_token')
+    //       )
+    //       .then((resp) => {
+    //         if (resp.data.status === 1) {
+    //           $q.notify('设置GM成功');
+    //         }
+    //       })
+    //       .catch(() => {
+    //         $q.notify('网络错误，请稍后重试');
+    //       });
+    //   }
+    //   break;
     case 'gm':
+      let time = setTimeout(() => {
+        $q.loading.hide();
+        clearTimeout(time);
+      }, 120000);
+
+      $q.loading.show();
+
       for (let index = 0; index < table.value.user.selected.length; index++) {
         const element = table.value.user.selected[index];
-
         useFetch()
           .post(
             store.backend + '/api/user/admin',
             {
-              userNo: element.userNo,
-              mac: '00:00:00:00:00:00',
+              username: element.userId.split(',')[0],
               password: element.userId.split(',')[1],
+              userNo: element.userNo,
+              familyname: element.userNickname,
+              create_user: element.userNickname,
+              create_id: element.userId.split(',')[0],
+              update_user: element.userNickname,
+              update_id: element.userId.split(',')[0],
             },
             $q.cookies.get('canplay_token')
           )
           .then((resp) => {
             if (resp.data.status === 1) {
-              $q.notify('设置GM成功');
+              $q.notify('设置个人GM成功');
             }
+
+            $q.loading.hide();
+            clearTimeout(time);
           })
           .catch(() => {
             $q.notify('网络错误，请稍后重试');
+            $q.loading.hide();
+            clearTimeout(time);
           });
       }
       break;

@@ -171,9 +171,9 @@ const table = ref({
       page: 1,
       rowsNumber: 0,
       rowsPerPage: 7,
-      sortBy: null,
+      sortBy: '',
       descending: true,
-    } as any,
+    } as QTableProps['pagination'],
     filter: '',
     columns: [
       {
@@ -306,7 +306,7 @@ const onRequest = (props: any) => {
       {
         curPage: (page - 1) * rowsPerPage,
         maxPage: rowsPerPage === 0 ? rowsNumber : rowsPerPage,
-        sortBy: sortBy === null ? 'version' : sortBy,
+        sortBy: sortBy === '' ? 'version' : sortBy,
         descending: descending,
       },
       $q.cookies.get('canplay_token')
@@ -338,10 +338,10 @@ const onRequest = (props: any) => {
         $q.notify('网络错误，请稍后重试');
       }
 
-      table.value.version.pagination.page = page;
-      table.value.version.pagination.rowsPerPage = rowsPerPage;
-      table.value.version.pagination.sortBy = sortBy;
-      table.value.version.pagination.descending = descending;
+      table.value.version.pagination!.page = page;
+      table.value.version.pagination!.rowsPerPage = rowsPerPage;
+      table.value.version.pagination!.sortBy = sortBy;
+      table.value.version.pagination!.descending = descending;
 
       $q.loading.hide();
       clearTimeout(time);
@@ -364,7 +364,7 @@ const onQuery = () => {
   useFetch()
     .get(store.backend + '/api/version/count', $q.cookies.get('canplay_token'))
     .then((resp) => {
-      table.value.version.pagination.rowsNumber = parseInt(resp.data.msg);
+      table.value.version.pagination!.rowsNumber = parseInt(resp.data.msg);
       onRequest({ pagination: table.value.version.pagination });
 
       $q.loading.hide();

@@ -19,7 +19,7 @@ namespace api
 		METHOD_ADD(User::update, "/update", Options, Post, "api::JwtFilter");
 		METHOD_ADD(User::characterUpdate, "/character/update", Options, Post, "api::JwtFilter");
 		METHOD_ADD(User::mail, "/mail", Options, Post, "api::JwtFilter");
-		METHOD_ADD(User::admin, "/admin", Options, Post, "api::JwtFilter");
+		METHOD_ADD(User::admin, "/admin/{type}/{method}", Options, Get, Put, Post, Delete, "api::JwtFilter");
 		METHOD_ADD(User::blockChat, "/blockchat", Options, Post, "api::JwtFilter");
 		METHOD_ADD(User::blockUser, "/blockuser", Options, Post, "api::JwtFilter");
 		METHOD_ADD(User::blockIp, "/blockip", Options, Post, "api::JwtFilter");
@@ -44,7 +44,7 @@ namespace api
 
 		void mail(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const;
 
-		void admin(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const;
+		void admin(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, const std::string& type, const std::string& method) const;
 
 		void blockChat(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const;
 
