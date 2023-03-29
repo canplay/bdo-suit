@@ -43,8 +43,15 @@
         <q-btn
           v-if="store.user.familyname === 'WebAdmin'"
           flat
-          label="管理"
+          label="管理面板"
           to="/admin"
+        />
+
+        <q-btn
+          v-if="store.user.familyname === 'WebAdmin'"
+          flat
+          label="个人信息"
+          to="/my"
         />
 
         <div class="col-auto" style="width: 30px" />

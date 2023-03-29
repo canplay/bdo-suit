@@ -16,6 +16,10 @@
 
         <q-space class="col-auto" />
 
+        <q-input v-model="table.user.search" label="用户名" />
+
+        <div class="col-auto" style="width: 8px" />
+
         <q-btn
           class="col-1"
           color="secondary"
@@ -99,6 +103,44 @@
           {{ props.value }}
         </div>
       </q-td>
+    </template>
+  </q-table>
+
+  <div style="height: 8px" />
+
+  <q-table
+    :rows="table.gm.rows"
+    :columns="table.gm.columns"
+    row-key="id"
+    separator="cell"
+    v-model:pagination="table.gm.pagination"
+    :filter="table.gm.filter"
+    @request="onRequest"
+    selection="multiple"
+    v-model:selected="table.gm.selected"
+  >
+    <template v-slot:top>
+      <div class="fit row">
+        <div class="col text-h5 flex items-center">GM管理</div>
+
+        <q-space class="col-auto" />
+
+        <q-btn class="col-1" color="secondary" label="添加" />
+
+        <div class="col-auto" style="width: 8px" />
+
+        <q-btn class="col-1" color="primary" label="删除" />
+      </div>
+    </template>
+
+    <template v-slot:header-cell="props">
+      <q-th :props="props" style="font: bold 15px arial, sans-serif">
+        {{ props.col.label }}
+      </q-th>
+    </template>
+
+    <template v-slot:body-selection="props">
+      <q-checkbox v-model="props.selected" />
     </template>
   </q-table>
 
@@ -337,6 +379,20 @@
       </q-card-actions>
     </q-card>
   </q-dialog>
+
+  <q-dialog v-model="dialog.gm.show">
+    <q-card style="min-width: 80vw">
+      <q-card-section class="text-h6">添加GM</q-card-section>
+
+      <q-card-section>
+        <q-input v-model="dialog.gm.id" label="ID" />
+      </q-card-section>
+
+      <q-card-actions class="row">
+        <q-btn class="col" label="发送" color="primary" @click="onSendMail()" />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script setup lang="ts">
@@ -358,6 +414,7 @@ const table = ref({
       descending: true,
     } as QTableProps['pagination'],
     filter: '',
+    search: '',
     selected: ref([] as any),
     columns: [
       {
@@ -427,6 +484,41 @@ const table = ref({
         name: 'characters',
         label: '游戏角色',
         field: 'characters',
+        align: 'center',
+        sortable: true,
+      },
+    ] as QTableProps['columns'],
+    rows: [] as any,
+  },
+  gm: {
+    pagination: {
+      page: 1,
+      rowsNumber: 0,
+      rowsPerPage: 7,
+      sortBy: '',
+      descending: true,
+    } as QTableProps['pagination'],
+    filter: '',
+    selected: ref([] as any),
+    columns: [
+      {
+        name: 'id',
+        label: '编号',
+        field: 'id',
+        align: 'center',
+        sortable: true,
+      },
+      {
+        name: 'userNo',
+        label: 'ID',
+        field: 'userNo',
+        align: 'center',
+        sortable: true,
+      },
+      {
+        name: 'role',
+        label: '角色',
+        field: 'role',
         align: 'center',
         sortable: true,
       },
@@ -666,6 +758,10 @@ const dialog = ref({
     enchantLevel: '0',
     itemCount: '0',
     webItemType: '0',
+  },
+  gm: {
+    show: false,
+    id: '',
   },
 });
 

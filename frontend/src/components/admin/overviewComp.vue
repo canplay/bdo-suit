@@ -18,7 +18,7 @@
         </div>
 
         <div>
-          市场待交易数量:
+          市场在售数量:
           {{ gameInfo.market }}
         </div>
       </q-card-section>
