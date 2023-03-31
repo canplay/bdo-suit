@@ -610,10 +610,8 @@ const onNewsRequest = (props: any) => {
             content: Base64.decode(resp.data.msg[i].content),
             create_date: resp.data.msg[i].create_date.replace(' +0800', ''),
             create_user: resp.data.msg[i].create_user,
-            create_id: resp.data.msg[i].create_id,
             update_date: resp.data.msg[i].update_date.replace(' +0800', ''),
             update_user: resp.data.msg[i].update_user,
-            update_id: resp.data.msg[i].update_id,
             delete: resp.data.msg[i].delete,
           });
         }
@@ -694,10 +692,8 @@ const onLinkRequest = (props: any) => {
             link: resp.data.msg[i].link,
             create_date: resp.data.msg[i].create_date.replace(' +0800', ''),
             create_user: resp.data.msg[i].create_user,
-            create_id: resp.data.msg[i].create_id,
             update_date: resp.data.msg[i].update_date.replace(' +0800', ''),
             update_user: resp.data.msg[i].update_user,
-            update_id: resp.data.msg[i].update_id,
           });
         }
       } else {
@@ -779,10 +775,8 @@ const onSlideRequest = (props: any) => {
             link: resp.data.msg[i].link,
             create_date: resp.data.msg[i].create_date.replace(' +0800', ''),
             create_user: resp.data.msg[i].create_user,
-            create_id: resp.data.msg[i].create_id,
             update_date: resp.data.msg[i].update_date.replace(' +0800', ''),
             update_user: resp.data.msg[i].update_user,
-            update_id: resp.data.msg[i].update_id,
           });
         }
       } else {
@@ -876,8 +870,7 @@ const onDel = (val: string) => {
             date: dialog.value.news.date,
             author: dialog.value.news.author,
             content: Base64.encode(dialog.value.news.content),
-            update_user: store.user.familyname,
-            update_id: store.user.username,
+            update_user: store.user.userno,
             delete: 1,
           },
           $q.cookies.get('canplay_token')
@@ -920,10 +913,8 @@ const onSave = (val: string) => {
               date: dialog.value.news.date,
               author: dialog.value.news.author,
               content: Base64.encode(dialog.value.news.content),
-              create_user: store.user.familyname,
-              create_id: store.user.username,
-              update_user: store.user.familyname,
-              update_id: store.user.username,
+              create_user: store.user.userno,
+              update_user: store.user.userno,
             },
             $q.cookies.get('canplay_token')
           )
@@ -950,8 +941,7 @@ const onSave = (val: string) => {
               date: dialog.value.news.date,
               author: dialog.value.news.author,
               content: Base64.encode(dialog.value.news.content),
-              update_user: store.user.familyname,
-              update_id: store.user.username,
+              update_user: store.user.userno,
               delete: 0,
             },
             $q.cookies.get('canplay_token')
@@ -983,8 +973,7 @@ const onSave = (val: string) => {
             desc: dialog.value.slide.desc,
             link: dialog.value.slide.link,
             img: dialog.value.slide.img,
-            update_user: store.user.familyname,
-            update_id: store.user.username,
+            update_user: store.user.userno,
           },
           $q.cookies.get('canplay_token')
         )
@@ -1012,8 +1001,7 @@ const onSave = (val: string) => {
             id: dialog.value.link.id,
             title: dialog.value.link.title,
             link: dialog.value.link.link,
-            update_user: store.user.familyname,
-            update_id: store.user.username,
+            update_user: store.user.userno,
           },
           $q.cookies.get('canplay_token')
         )

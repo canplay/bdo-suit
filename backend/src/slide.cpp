@@ -45,7 +45,7 @@ namespace api
 		time_t time = std::chrono::system_clock::to_time_t(now);
 		auto timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(time));
 
-		auto stmt = fmt::format("INSERT INTO [SA_BETA_WORLDDB_0002].[PaWebPublic].[slide] ([id], [title], [desc], [link], [create_date], [create_user], [create_id], [update_date], [update_user], [update_id], [img]) VALUES ('{}', N'{}', N'{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}');", uuidSimple(), (*json)["title"].asString(), (*json)["desc"].asString(), (*json)["link"].asString(), timestamp, (*json)["create_user"].asString(), (*json)["create_id"].asString(), timestamp, (*json)["update_user"].asString(), (*json)["update_id"].asString(), (*json)["img"].asString());
+		auto stmt = fmt::format("INSERT INTO [SA_BETA_WORLDDB_0002].[PaWebPublic].[slide] ([id], [title], [desc], [link], [create_date], [create_user], [update_date], [update_user], [img]) VALUES ('{}', N'{}', N'{}', '{}', '{}', '{}', '{}', '{}', '{}');", uuidSimple(), (*json)["title"].asString(), (*json)["desc"].asString(), (*json)["link"].asString(), timestamp, (*json)["create_user"].asString(), timestamp, (*json)["update_user"].asString(), (*json)["img"].asString());
 
 		Json::Value ret;
 
@@ -89,7 +89,7 @@ namespace api
 		time_t time = std::chrono::system_clock::to_time_t(now);
 		auto timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(time));
 
-		auto stmt = fmt::format("UPDATE [SA_BETA_WORLDDB_0002].[PaWebPublic].[slide] SET [title] = N'{}', [desc] = N'{}', [link] = '{}', [update_date] = '{}', [update_user] = '{}', [update_id] = '{}', [img] = '{}' WHERE [id] = '{}';", utf8ToGBK((*json)["title"].asString()), utf8ToGBK((*json)["desc"].asString()), (*json)["link"].asString(), timestamp, (*json)["update_user"].asString(), (*json)["update_id"].asString(), (*json)["img"].asString(), (*json)["id"].asString());
+		auto stmt = fmt::format("UPDATE [SA_BETA_WORLDDB_0002].[PaWebPublic].[slide] SET [title] = N'{}', [desc] = N'{}', [link] = '{}', [update_date] = '{}', [update_user] = '{}', [img] = '{}' WHERE [id] = '{}';", utf8ToGBK((*json)["title"].asString()), utf8ToGBK((*json)["desc"].asString()), (*json)["link"].asString(), timestamp, (*json)["update_user"].asString(), (*json)["img"].asString(), (*json)["id"].asString());
 
 		Json::Value ret;
 
@@ -160,10 +160,8 @@ namespace api
 				info["link"] = r.get<std::string>("link", "");
 				info["create_date"] = r.get<std::string>("create_date", "");
 				info["create_user"] = r.get<std::string>("create_user", "");
-				info["create_id"] = r.get<std::string>("create_id", "");
 				info["update_date"] = r.get<std::string>("update_date", "");
 				info["update_user"] = r.get<std::string>("update_user", "");
-				info["update_id"] = r.get<std::string>("update_id", "");
 				info["img"] = r.get<std::string>("img", "");
 				infos.append(info);
 			}

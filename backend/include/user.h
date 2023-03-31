@@ -51,5 +51,8 @@ namespace api
 		void blockUser(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const;
 
 		void blockIp(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const;
+
+	private:
+		Json::Value getPermission(const std::string userNo) const;
 	};
 }

@@ -126,13 +126,6 @@ const table = ref({
       sortable: true,
     },
     {
-      name: 'create_id',
-      label: '创建人ID',
-      field: 'create_id',
-      align: 'center',
-      sortable: true,
-    },
-    {
       name: 'update_date',
       label: '更新时间',
       field: 'update_date',
@@ -143,13 +136,6 @@ const table = ref({
       name: 'update_user',
       label: '更新人',
       field: 'update_user',
-      align: 'center',
-      sortable: true,
-    },
-    {
-      name: 'update_id',
-      label: '更新人ID',
-      field: 'update_ids',
       align: 'center',
       sortable: true,
     },
@@ -164,10 +150,8 @@ const dialog = ref({
   familyname: '',
   create_date: '',
   create_user: '',
-  create_id: '',
   update_date: '',
   update_user: '',
-  update_id: '',
 });
 
 const onRequest = (props: any) => {

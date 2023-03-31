@@ -75,7 +75,7 @@ namespace api
 				time_t time = std::chrono::system_clock::to_time_t(now);
 				auto timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(time));
 
-				auto stmt = fmt::format("INSERT INTO [SA_BETA_WORLDDB_0002].[PaWebPublic].[version] ([id], [name], [version], [force], [link], [create_date], [create_user], [create_id], [update_date], [update_user], [update_id], [delete], [oldPath], [newPath], [savePath]) VALUES ('{}', '{}', '{}', {}, '{}', '{}', '{}', '{}', '{}', '{}', '{}', 0, '{}', '{}', '{}');", uuidSimple(), (*json)["name"].asString(), (*json)["version"].asString(), (*json)["force"].asInt64(), (*json)["link"].asString(), timestamp, (*json)["create_user"].asString(), (*json)["create_id"].asString(), timestamp, (*json)["update_user"].asString(), (*json)["update_id"].asString(), (*json)["oldPath"].asString(), (*json)["newPath"].asString(), (*json)["savePath"].asString());
+				auto stmt = fmt::format("INSERT INTO [SA_BETA_WORLDDB_0002].[PaWebPublic].[version] ([id], [name], [version], [force], [link], [create_date], [create_user], [update_date], [update_user], [delete], [oldPath], [newPath], [savePath]) VALUES ('{}', '{}', '{}', {}, '{}', '{}', '{}', '{}', '{}', 0, '{}', '{}', '{}');", uuidSimple(), (*json)["name"].asString(), (*json)["version"].asString(), (*json)["force"].asInt64(), (*json)["link"].asString(), timestamp, (*json)["create_user"].asString(), timestamp, (*json)["update_user"].asString(), (*json)["oldPath"].asString(), (*json)["newPath"].asString(), (*json)["savePath"].asString());
 
 				auto r = MsSql::exec(stmt);
 
@@ -130,7 +130,7 @@ namespace api
 		time_t time = std::chrono::system_clock::to_time_t(now);
 		auto timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(time));
 
-		auto stmt = fmt::format("UPDATE [SA_BETA_WORLDDB_0002].[PaWebPublic].[version] SET [name] = '{}', [version] = '{}', [force] = {}, [link] = '{}', [update_date] = '{}', [update_user] = '{}', [update_id] = '{}', [delete] = {}, [oldPath] = '{}', [newPath] = '{}', [savePath] = '{}' WHERE [id] = '{}';", (*json)["name"].asString(), (*json)["version"].asString(), (*json)["force"].asInt64(), (*json)["link"].asString(), timestamp, (*json)["update_user"].asString(), (*json)["update_id"].asString(), (*json)["delete"].asInt64(), (*json)["oldPath"].asString(), (*json)["newPath"].asString(), (*json)["savePath"].asString(), (*json)["id"].asString());
+		auto stmt = fmt::format("UPDATE [SA_BETA_WORLDDB_0002].[PaWebPublic].[version] SET [name] = '{}', [version] = '{}', [force] = {}, [link] = '{}', [update_date] = '{}', [update_user] = '{}', [delete] = {}, [oldPath] = '{}', [newPath] = '{}', [savePath] = '{}' WHERE [id] = '{}';", (*json)["name"].asString(), (*json)["version"].asString(), (*json)["force"].asInt64(), (*json)["link"].asString(), timestamp, (*json)["update_user"].asString(), (*json)["delete"].asInt64(), (*json)["oldPath"].asString(), (*json)["newPath"].asString(), (*json)["savePath"].asString(), (*json)["id"].asString());
 
 		spdlog::info(stmt);
 
@@ -204,10 +204,8 @@ namespace api
 				info["link"] = r.get<std::string>("link", "");
 				info["create_date"] = r.get<std::string>("create_date", "");
 				info["create_user"] = r.get<std::string>("create_user", "");
-				info["create_id"] = r.get<std::string>("create_id", "");
 				info["update_date"] = r.get<std::string>("update_date", "");
 				info["update_user"] = r.get<std::string>("update_user", "");
-				info["update_id"] = r.get<std::string>("update_id", "");
 				info["delete"] = r.get<INT64>("delete", 0);
 				info["oldPath"] = r.get<std::string>("oldPath", "");
 				info["newPath"] = r.get<std::string>("newPath", "");

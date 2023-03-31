@@ -1089,10 +1089,8 @@ const userAction = (val: string) => {
               password: element.userId.split(',')[1],
               userNo: element.userNo,
               familyname: element.userNickname,
-              create_user: element.userNickname,
-              create_id: element.userId.split(',')[0],
-              update_user: element.userNickname,
-              update_id: element.userId.split(',')[0],
+              create_user: element.userno,
+              update_user: element.userno,
             },
             $q.cookies.get('canplay_token')
           )

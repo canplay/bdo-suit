@@ -327,10 +327,8 @@ const onRequest = (props: any) => {
             savePath: resp.data.msg[i].savePath,
             create_date: resp.data.msg[i].create_date.replace(' +0800', ''),
             create_user: resp.data.msg[i].create_user,
-            create_id: resp.data.msg[i].create_id,
             update_date: resp.data.msg[i].update_date.replace(' +0800', ''),
             update_user: resp.data.msg[i].update_user,
-            update_id: resp.data.msg[i].update_id,
             delete: resp.data.msg[i].delete,
           });
         }
@@ -399,8 +397,7 @@ const onDel = () => {
         oldPath: dialog.value.version.dir.oldPath,
         newPath: dialog.value.version.dir.newPath,
         savePath: dialog.value.version.dir.savePath,
-        update_user: store.user.familyname,
-        update_id: store.user.username,
+        update_user: store.user.userno,
         delete: 1,
       },
       $q.cookies.get('canplay_token')
@@ -443,10 +440,8 @@ const onSave = () => {
           oldPath: dialog.value.version.dir.oldPath,
           newPath: dialog.value.version.dir.newPath,
           savePath: dialog.value.version.dir.savePath,
-          create_user: store.user.familyname,
-          create_id: store.user.username,
-          update_user: store.user.familyname,
-          update_id: store.user.username,
+          create_user: store.user.userno,
+          update_user: store.user.userno,
         },
         $q.cookies.get('canplay_token')
       )
@@ -476,8 +471,7 @@ const onSave = () => {
           oldPath: dialog.value.version.dir.oldPath,
           newPath: dialog.value.version.dir.newPath,
           savePath: dialog.value.version.dir.savePath,
-          update_user: store.user.familyname,
-          update_id: store.user.username,
+          update_user: store.user.userno,
           delete: 0,
         },
         $q.cookies.get('canplay_token')

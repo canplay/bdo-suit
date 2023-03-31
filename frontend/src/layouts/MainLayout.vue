@@ -41,14 +41,14 @@
         <div class="col-auto" style="width: 30px" />
 
         <q-btn
-          v-if="store.user.familyname === 'WebAdmin'"
+          v-if="usePermission().check('bdo', 'admin')"
           flat
           label="管理面板"
           to="/admin"
         />
 
         <q-btn
-          v-if="store.user.familyname === 'WebAdmin'"
+          v-if="usePermission().check('bdo', 'my')"
           flat
           label="个人信息"
           to="/my"
@@ -89,6 +89,7 @@ import { useQuasar } from 'quasar';
 import { useStore } from 'src/stores/store';
 import useFetch from 'src/components/fetch';
 import * as jose from 'jose';
+import usePermission from 'src/components/permission';
 
 const $q = useQuasar();
 const store = useStore();
@@ -123,12 +124,14 @@ if ($q.cookies.has('canplay_token') && $q.cookies.get('canplay_token') != '') {
       let username = resp.data.msg.userId.split(',');
 
       store.user = {
+        userno: resp.data.msg.userNo,
         signin: true,
         username: username[0],
         password: username[1],
         familyname: resp.data.msg.userNickname,
         cash: 0,
         pearl: 0,
+        permission: resp.data.msg.permission,
       };
     })
     .catch(() => {

@@ -672,12 +672,14 @@ const onSignin = () => {
       $q.cookies.set('canplay_token', resp.data.msg.token);
 
       store.user = {
+        userno: resp.data.msg.userNo,
         signin: true,
         username: username.value,
         password: password.value,
         familyname: resp.data.msg.userNickname,
         cash: 0,
         pearl: 0,
+        permission: resp.data.msg.permission,
       };
 
       $q.loading.hide();
@@ -694,12 +696,14 @@ const onSignup = () => {
   if (store.user.signin) {
     $q.cookies.remove('canplay_token');
     store.user = {
+      userno: -1,
       signin: false,
       username: '',
       password: '',
       familyname: '',
       cash: 0,
       pearl: 0,
+      permission: {},
     };
   } else {
     let time = setTimeout(() => {
@@ -725,12 +729,14 @@ const onSignup = () => {
         $q.cookies.set('canplay_token', resp.data.msg.token);
 
         store.user = {
+          userno: resp.data.msg.userNo,
           signin: true,
           username: username.value,
           password: password.value,
           familyname: resp.data.msg.userNickname,
           cash: 0,
           pearl: 0,
+          permission: resp.data.msg.permission,
         };
 
         $q.loading.hide();
@@ -772,10 +778,8 @@ useFetch()
           content: marked.parse(Base64.decode(resp.data.msg[i].content)),
           create_date: resp.data.msg[i].create_date.replace(' +0800', ''),
           create_user: resp.data.msg[i].create_user,
-          create_id: resp.data.msg[i].create_id,
           update_date: resp.data.msg[i].update_date.replace(' +0800', ''),
           update_user: resp.data.msg[i].update_user,
-          update_id: resp.data.msg[i].update_id,
         });
       }
     } else {
@@ -805,10 +809,8 @@ useFetch()
           link: resp.data.msg[i].link,
           create_date: resp.data.msg[i].create_date.replace(' +0800', ''),
           create_user: resp.data.msg[i].create_user,
-          create_id: resp.data.msg[i].create_id,
           update_date: resp.data.msg[i].update_date.replace(' +0800', ''),
           update_user: resp.data.msg[i].update_user,
-          update_id: resp.data.msg[i].update_id,
           img: resp.data.msg[i].img,
         });
       }

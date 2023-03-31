@@ -165,6 +165,7 @@ namespace api
 				info["totalPlayTime"] = r.get<INT64>("_totalPlayTime", 0);
 				info["membershipType"] = r.get<INT64>("_membershipType", 0);
 				info["pcroom"] = r.get<INT64>("_isPcRoom", 0);
+				info["permission"] = getPermission(std::to_string(r.get<INT64>("_userNo", 0)));
 
 				jwt jwtGenerated = jwt::generateToken(
 					{
@@ -239,7 +240,7 @@ namespace api
 			{
 				Json::Value info;
 				info["registerDate"] = r.get<std::string>("_registerDate", "");
-				info["valid"] = r.get<INT64>("_isValid", 0);
+				info["valid"] = r.get<std::string>("_isValid", "");
 				info["userNo"] = r.get<INT64>("_userNo", 0);
 				info["userId"] = r.get<std::string>("_userId", "");
 				info["userNickname"] = r.get<std::string>("_userNickname", "");
@@ -248,6 +249,7 @@ namespace api
 				info["totalPlayTime"] = r.get<INT64>("_totalPlayTime", 0);
 				info["membershipType"] = r.get<INT64>("_membershipType", 0);
 				info["pcroom"] = r.get<INT64>("_isPcRoom", 0);
+				info["permission"] = getPermission(std::to_string(r.get<INT64>("_userNo", 0)));
 
 				Json::Value characters;
 				auto stmt1 = fmt::format("SELECT * FROM [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblCharacterInformation] WHERE [_userNo] = {}", r.get<INT64>("_userNo", 0));
@@ -328,6 +330,7 @@ namespace api
 			info["totalPlayTime"] = r.get<INT64>("_totalPlayTime", 0);
 			info["membershipType"] = r.get<INT64>("_membershipType", 0);
 			info["pcroom"] = r.get<INT64>("_isPcRoom", 0);
+			info["permission"] = getPermission(std::to_string(r.get<INT64>("_userNo", 0)));
 
 			Json::Value characters;
 			auto stmt1 = fmt::format("SELECT * FROM [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblCharacterInformation] WHERE [_userNo] = {}", r.get<INT64>("_userNo", 0));
@@ -580,10 +583,11 @@ namespace api
 			try
 			{
 				auto r = MsSql::exec(stmt);
+				r.next();
 
 				if (r.rows() > 0)
 				{
-					ret["msg"] = r.rows();
+					ret["msg"] = r.get<INT64>(0, 0);
 					ret["status"] = 1;
 				}
 				else
@@ -624,6 +628,7 @@ namespace api
 					try
 					{
 						auto r = MsSql::exec(stmt);
+						r.next();
 
 						if (r.rows() > 0)
 						{
@@ -675,6 +680,7 @@ namespace api
 					try
 					{
 						auto r = MsSql::exec(stmt);
+						r.next();
 
 						if (r.rows() > 0)
 						{
@@ -688,10 +694,8 @@ namespace api
 								info["familyname"] = r.get<std::string>("userNickname", "");
 								info["create_date"] = r.get<std::string>("create_date", "");
 								info["create_user"] = r.get<std::string>("create_user", "");
-								info["create_id"] = r.get<std::string>("create_id", "");
 								info["update_date"] = r.get<std::string>("update_date", "");
 								info["update_user"] = r.get<std::string>("update_user", "");
-								info["update_id"] = r.get<std::string>("update_id", "");
 								infos.append(info);
 							}
 
@@ -719,7 +723,7 @@ namespace api
 				}
 				else
 				{
-					stmt = fmt::format("INSERT INTO [SA_BETA_WORLDDB_0002].[PaWebPublic].[admin] ([id], [userNo], [userNickname], [create_date], [create_user], [create_id], [update_date], [update_user], [update_id]) VALUES('{}', '{},{}', '{}', '{}', '{}')", uuidSimple(), (*json)["username"].asString(), (*json)["password"].asString(), (*json)["familyname"].asString(), timestamp, (*json)["create_user"].asString(), (*json)["create_id"].asString(), timestamp, (*json)["update_user"].asString(), (*json)["update_id"].asString());
+					stmt = fmt::format("INSERT INTO [SA_BETA_WORLDDB_0002].[PaWebPublic].[account] ([id], [userNo], [create_date], [create_user], [update_date], [update_user] VALUES('{}', {}, '{}', '{}', '{}', '{}')", uuidSimple(), (*json)["userNo"].asInt64(), timestamp, (*json)["create_user"].asString(), timestamp, (*json)["update_user"].asString());
 				}
 
 				try
@@ -917,5 +921,40 @@ namespace api
 		}
 
 		callback(HttpResponse::newHttpJsonResponse(ret));
+	}
+
+	Json::Value User::getPermission(const std::string userNo) const
+	{
+		auto stmt = fmt::format("SELECT * FROM [SA_BETA_WORLDDB_0002].[PaWebPublic].[account] WHERE userNo = '{}'", userNo);
+
+		Json::Value ret = {};
+
+		try
+		{
+			auto r = MsSql::exec(stmt);
+			r.next();
+
+			if (r.rows() > 0)
+			{
+				stmt = fmt::format("SELECT * FROM [SA_BETA_WORLDDB_0002].[PaWebPublic].[permissions] WHERE id = '{}'", r.get<std::string>("permission", ""));
+
+				r = MsSql::exec(stmt);
+				r.next();
+
+				if (r.rows() > 0)
+				{
+					auto permission = r.get<std::string>("value", "{}");
+
+					Json::Reader reader;
+					reader.parse(permission, ret);
+				}
+			}
+		}
+		catch (const std::exception& e)
+		{
+			spdlog::warn("get permission error: {}", e.what());
+		}
+
+		return ret;
 	}
 }
