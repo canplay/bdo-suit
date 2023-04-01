@@ -61,7 +61,7 @@
       <q-card-section class="text-h6">自助修改</q-card-section>
 
       <q-card-section>
-        <q-form @submit="onSubmit">
+        <q-form @submit="onUpdateInfo">
           <div class="row">
             <q-input class="col" v-model="account.username" label="用户名" />
 
@@ -87,34 +87,20 @@
       <q-card-section class="text-h6">自助邮件</q-card-section>
 
       <q-card-section>
-        <q-form @submit="onSubmit">
+        <q-form @submit="onSendMail">
           <div class="row">
-            <q-input
-              class="col"
-              v-model="mail.title"
-              label="标题"
-              lazy-rules
-              :rules="[(val) => (val && val.length > 0) || '此为必填项']"
-            />
+            <q-input class="col" v-model="mail.variousNo" label="物品ID">
+              <template v-slot:append>
+                <q-btn
+                  color="primary"
+                  label="ID列表"
+                  @click="store.dialog.items = true"
+                />
+              </template>
+            </q-input>
 
             <div class="col-auto" style="width: 8px" />
 
-            <q-input
-              class="col"
-              v-model="mail.contents"
-              label="内容"
-              lazy-rules
-              :rules="[(val) => (val && val.length > 0) || '此为必填项']"
-            />
-
-            <div class="col-auto" style="width: 8px" />
-
-            <q-input class="col" v-model="mail.variousNo" label="物品" />
-          </div>
-
-          <div style="height: 8px" />
-
-          <div class="row">
             <q-input class="col" v-model="mail.enchantLevel" label="强化等级" />
 
             <div class="col-auto" style="width: 8px" />
@@ -129,10 +115,19 @@
       </q-card-section>
     </q-card>
   </q-page>
+
+  <itemComp />
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
+import { useQuasar } from 'quasar';
+import useFetch from 'src/components/fetch';
+import { useStore } from 'src/stores/store';
+import itemComp from 'src/components/itemComp.vue';
+
+const $q = useQuasar();
+const store = useStore();
 
 const account = ref({
   username: '',
@@ -141,36 +136,81 @@ const account = ref({
 });
 const characters = ref([] as any);
 const mail = ref({
-  title: '',
-  contents: '',
   variousNo: '',
   enchantLevel: '0',
   itemCount: '0',
 });
 
-for (let index = 0; index < 5; index++) {
-  characters.value.push({
-    characterName: index,
-    level: 1,
-    classType: 1,
-    totalPlayTime: 1,
-    experience: 1,
-    tendency: 1,
-    variedWeight: 1,
-    inventorySlotCount: 1,
-    hp: 1,
-    mp: 1,
-    sp: 1,
-    wp: 1,
-    titleKey: 1,
-    defenceValue: 1,
-    offenceValue: 1,
-    awakenValue: 1,
-    expanded: false,
-  });
-}
-
-const onSubmit = () => {
+const onUpdateInfo = () => {
   return;
 };
+
+const onSendMail = () => {
+  let time = setTimeout(() => {
+    $q.loading.hide();
+    clearTimeout(time);
+  }, 120000);
+
+  $q.loading.show();
+
+  useFetch()
+    .post(
+      store.backend + '/api/user/mail',
+      {
+        senderName: '自助邮件',
+        senderUserNo: 0,
+        receiverName: store.user.username,
+        receiverUserNo: store.user.userno,
+        title: '自助邮件',
+        contents: '自助邮件',
+        mailType: 0,
+        variousNo: parseInt(mail.value.variousNo),
+        enchantLevel: parseInt(mail.value.enchantLevel),
+        itemCount:
+          parseInt(mail.value.itemCount) >= 1000
+            ? 1000
+            : parseInt(mail.value.itemCount),
+        webItemType: 0,
+        expirationDate: '',
+      },
+      $q.cookies.get('canplay_token')
+    )
+    .then((resp) => {
+      if (resp.data.status === 1) {
+        $q.notify('发送邮件成功');
+      }
+
+      $q.loading.hide();
+      clearTimeout(time);
+    })
+    .catch(() => {
+      $q.notify('网络错误，请稍后重试');
+      $q.loading.hide();
+      clearTimeout(time);
+    });
+};
+
+onMounted(() => {
+  for (let index = 0; index < 1; index++) {
+    characters.value.push({
+      characterName: index,
+      level: 1,
+      classType: 1,
+      totalPlayTime: 1,
+      experience: 1,
+      tendency: 1,
+      variedWeight: 1,
+      inventorySlotCount: 1,
+      hp: 1,
+      mp: 1,
+      sp: 1,
+      wp: 1,
+      titleKey: 1,
+      defenceValue: 1,
+      offenceValue: 1,
+      awakenValue: 1,
+      expanded: false,
+    });
+  }
+});
 </script>

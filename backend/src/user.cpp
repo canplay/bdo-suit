@@ -227,7 +227,7 @@ namespace api
 		}
 		else
 			stmt = fmt::format("{})", stmt);
-		spdlog::info(stmt);
+		;
 		Json::Value ret;
 
 		try
@@ -522,8 +522,6 @@ namespace api
 
 		stmt = fmt::format("{})", stmt);
 
-		spdlog::info(stmt);
-
 		Json::Value ret;
 
 		try
@@ -551,7 +549,149 @@ namespace api
 		callback(HttpResponse::newHttpJsonResponse(ret));
 	}
 
-	void User::admin(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, const std::string& type, const std::string& method) const
+	void User::adminCount(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, const std::string type) const
+	{
+		Json::Value ret;
+
+		auto stmt = fmt::format("SELECT COUNT(_UserNo) FROM [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblRoleGroupMember]");
+
+		if (type != "ingame")
+		{
+			stmt = fmt::format("SELECT COUNT(id) FROM [SA_BETA_WORLDDB_0002].[PaWebPublic].[account]");
+		}
+
+		try
+		{
+			auto r = MsSql::exec(stmt);
+			r.next();
+
+			if (r.rows() > 0)
+			{
+				ret["msg"] = r.get<INT64>(0, 0);
+				ret["status"] = 1;
+			}
+			else
+			{
+				ret["msg"] = "admin count error";
+				ret["status"] = 0;
+			}
+		}
+		catch (const std::exception& e)
+		{
+			spdlog::warn("admin count error: {}", e.what());
+			ret["msg"] = e.what();
+			ret["status"] = 0;
+		}
+
+		callback(HttpResponse::newHttpJsonResponse(ret));
+	}
+
+	void User::adminInfo(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, const std::string type) const
+	{
+		Json::Value ret;
+
+		std::shared_ptr<Json::Value> json = req->getJsonObject();
+		if (!json)
+		{
+			ret["msg"] = "error";
+			ret["status"] = 0;
+			return callback(HttpResponse::newHttpJsonResponse(ret));
+		}
+
+		if (type == "ingame")
+		{
+			auto stmt = fmt::format("SELECT TOP {} * FROM [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblRoleGroupMember] WHERE _UserNo NOT IN(SELECT TOP {} _UserNo FROM [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblRoleGroupMember]", (*json)["maxPage"].asInt64(), (*json)["curPage"].asInt64());
+
+			if ((*json)["sortBy"].asString() != "")
+			{
+				stmt = fmt::format("{} ORDER BY [{}] DESC) ORDER BY [{}]", stmt, (*json)["sortBy"].asString(), (*json)["sortBy"].asString());
+
+				if ((*json)["descending"].asBool())
+					stmt = fmt::format("{} DESC", stmt);
+				else
+					stmt = fmt::format("{} ASC", stmt);
+			}
+			else
+				stmt = fmt::format("{})", stmt);
+
+			try
+			{
+				auto r = MsSql::exec(stmt);
+
+				Json::Value infos;
+
+				while (r.next())
+				{
+					Json::Value info;
+					info["UserNo"] = r.get<std::string>("_UserNo", "");
+					info["roleGroupNo"] = r.get<std::string>("_roleGroupNo", "");
+					info["macAddress"] = r.get<std::string>("_macAddress", "");
+					info["IpAddress"] = r.get<std::string>("_IpAddress", "");
+					info["password"] = r.get<std::string>("_password", "");
+					infos.append(info);
+				}
+
+				ret["msg"] = infos;
+				ret["status"] = 1;
+			}
+			catch (const std::exception& e)
+			{
+				spdlog::warn("admin info error: {}", e.what());
+				ret["msg"] = e.what();
+				ret["status"] = 0;
+			}
+		}
+		else
+		{
+			auto stmt = fmt::format("SELECT TOP {} * FROM [SA_BETA_WORLDDB_0002].[PaWebPublic].[account] WHERE id NOT IN(SELECT TOP {} id FROM [SA_BETA_WORLDDB_0002].[PaWebPublic].[account]", (*json)["maxPage"].asInt64(), (*json)["curPage"].asInt64());
+
+			if ((*json)["sortBy"].asString() != "")
+			{
+				stmt = fmt::format("{} ORDER BY [{}] DESC) ORDER BY [{}]", stmt, (*json)["sortBy"].asString(), (*json)["sortBy"].asString());
+
+				if ((*json)["descending"].asBool())
+					stmt = fmt::format("{} DESC", stmt);
+				else
+					stmt = fmt::format("{} ASC", stmt);
+			}
+			else
+				stmt = fmt::format("{})", stmt);
+
+			try
+			{
+				auto r = MsSql::exec(stmt);
+
+				Json::Value infos;
+
+				while (r.next())
+				{
+					Json::Value info;
+					info["id"] = r.get<std::string>("id", "");
+					info["userno"] = r.get<std::string>("userNo", "");
+					info["permission"] = r.get<std::string>("permission", "");
+					info["create_date"] = r.get<std::string>("create_date", "");
+					info["create_user"] = r.get<std::string>("create_user", "");
+					info["update_date"] = r.get<std::string>("update_date", "");
+					info["update_user"] = r.get<std::string>("update_user", "");
+					info["delete"] = r.get<int>("delete", -1);
+					infos.append(info);
+				}
+
+				ret["msg"] = infos;
+				ret["status"] = 1;
+			}
+			catch (const std::exception& e)
+			{
+				spdlog::warn("admin info error: {}", e.what());
+				ret["msg"] = e.what();
+				ret["status"] = 0;
+			}
+		}
+
+		callback(HttpResponse::newHttpJsonResponse(ret));
+	}
+
+	void User::adminUpdate(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, const std::string type) const
 	{
 		Json::Value ret;
 
@@ -569,161 +709,14 @@ namespace api
 
 		std::string stmt = "";
 
-		if (method == "count")
-		{
-			if (type == "ingame")
-			{
-				stmt = fmt::format("SELECT COUNT(_UserNo) FROM [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblRoleGroupMember]");
-			}
-			else
-			{
-				stmt = fmt::format("SELECT COUNT(id) FROM [SA_BETA_WORLDDB_0002].[PaWebPublic].[admin]");
-			}
-
-			try
-			{
-				auto r = MsSql::exec(stmt);
-				r.next();
-
-				if (r.rows() > 0)
-				{
-					ret["msg"] = r.get<INT64>(0, 0);
-					ret["status"] = 1;
-				}
-				else
-				{
-					ret["msg"] = "admin get count error";
-					ret["status"] = 0;
-				}
-			}
-			catch (const std::exception& e)
-			{
-				spdlog::warn("admin get count error: {}", e.what());
-				ret["msg"] = e.what();
-				ret["status"] = 0;
-			}
-
-			return callback(HttpResponse::newHttpJsonResponse(ret));
-		}
-
 		switch (req->getMethod())
 		{
-			case Get:
-				if (type == "ingame")
-				{
-					stmt = fmt::format("SELECT TOP {} * FROM [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblRoleGroupMember] WHERE _UserNo NOT IN(SELECT TOP {} _UserNo FROM [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblRoleGroupMember]", (*json)["maxPage"].asInt64(), (*json)["curPage"].asInt64());
-
-					if ((*json)["sortBy"].asString() != "")
-					{
-						stmt = fmt::format("{} ORDER BY [{}] DESC) ORDER BY [{}]", stmt, (*json)["sortBy"].asString(), (*json)["sortBy"].asString());
-
-						if ((*json)["descending"].asBool())
-							stmt = fmt::format("{} DESC", stmt);
-						else
-							stmt = fmt::format("{} ASC", stmt);
-					}
-					else
-						stmt = fmt::format("{})", stmt);
-
-					try
-					{
-						auto r = MsSql::exec(stmt);
-						r.next();
-
-						if (r.rows() > 0)
-						{
-							Json::Value infos;
-
-							while (r.next())
-							{
-								Json::Value info;
-								info["UserNo"] = r.get<std::string>("_UserNo", "");
-								info["roleGroupNo"] = r.get<std::string>("_roleGroupNo", "");
-								info["macAddress"] = r.get<std::string>("_macAddress", "");
-								info["IpAddress"] = r.get<std::string>("_IpAddress", "");
-								info["password"] = r.get<std::string>("_password", "");
-								infos.append(info);
-							}
-
-							ret["msg"] = infos;
-							ret["status"] = 1;
-						}
-						else
-						{
-							ret["msg"] = "admin get error";
-							ret["status"] = 0;
-						}
-					}
-					catch (const std::exception& e)
-					{
-						spdlog::warn("admin get error: {}", e.what());
-						ret["msg"] = e.what();
-						ret["status"] = 0;
-					}
-				}
-				else
-				{
-					stmt = fmt::format("SELECT TOP {} * FROM [SA_BETA_WORLDDB_0002].[PaWebPublic].[admin] WHERE id NOT IN(SELECT TOP {} id FROM [SA_BETA_WORLDDB_0002].[PaWebPublic].[admin]", (*json)["maxPage"].asInt64(), (*json)["curPage"].asInt64());
-
-					if ((*json)["sortBy"].asString() != "")
-					{
-						stmt = fmt::format("{} ORDER BY [{}] DESC) ORDER BY [{}]", stmt, (*json)["sortBy"].asString(), (*json)["sortBy"].asString());
-
-						if ((*json)["descending"].asBool())
-							stmt = fmt::format("{} DESC", stmt);
-						else
-							stmt = fmt::format("{} ASC", stmt);
-					}
-					else
-						stmt = fmt::format("{})", stmt);
-
-					try
-					{
-						auto r = MsSql::exec(stmt);
-						r.next();
-
-						if (r.rows() > 0)
-						{
-							Json::Value infos;
-
-							while (r.next())
-							{
-								Json::Value info;
-								info["id"] = r.get<std::string>("id", "");
-								info["userno"] = r.get<std::string>("userNo", "");
-								info["familyname"] = r.get<std::string>("userNickname", "");
-								info["create_date"] = r.get<std::string>("create_date", "");
-								info["create_user"] = r.get<std::string>("create_user", "");
-								info["update_date"] = r.get<std::string>("update_date", "");
-								info["update_user"] = r.get<std::string>("update_user", "");
-								infos.append(info);
-							}
-
-							ret["msg"] = infos;
-							ret["status"] = 1;
-						}
-						else
-						{
-							ret["msg"] = "admin get error";
-							ret["status"] = 0;
-						}
-					}
-					catch (const std::exception& e)
-					{
-						spdlog::warn("admin get error: {}", e.what());
-						ret["msg"] = e.what();
-						ret["status"] = 0;
-					}
-				}
-				break;
 			case Put:
-				if (type == "ingame")
+				stmt = fmt::format("INSERT INTO [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblRoleGroupMember] ([_UserNo], [_roleGroupNo], [_macAddress], [_IpAddress], [_password]) VALUES('{}', '1', '{}', '127.0.0.1', '{}')", (*json)["userNo"].asInt64(), (*json)["mac"].asString(), (*json)["password"].asString());
+
+				if (type != "ingame")
 				{
-					stmt = fmt::format("INSERT INTO [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblRoleGroupMember] ([_UserNo], [_roleGroupNo], [_macAddress], [_IpAddress], [_password]) VALUES('{}', '1', '{}', '127.0.0.1', '{}')", (*json)["userNo"].asInt64(), (*json)["mac"].asString(), (*json)["password"].asString());
-				}
-				else
-				{
-					stmt = fmt::format("INSERT INTO [SA_BETA_WORLDDB_0002].[PaWebPublic].[account] ([id], [userNo], [create_date], [create_user], [update_date], [update_user] VALUES('{}', {}, '{}', '{}', '{}', '{}')", uuidSimple(), (*json)["userNo"].asInt64(), timestamp, (*json)["create_user"].asString(), timestamp, (*json)["update_user"].asString());
+					stmt = fmt::format("INSERT INTO [SA_BETA_WORLDDB_0002].[PaWebPublic].[account] ([id], [userNo], [permission], [create_date], [create_user], [update_date], [update_user], [delete]) VALUES('{}', {}, '{}', '{}', '{}', '{}', '{}', 0)", uuidSimple(), (*json)["userNo"].asInt64(), (*json)["permission"].asString(), timestamp, (*json)["create_user"].asString(), timestamp, (*json)["update_user"].asString());
 				}
 
 				try
@@ -737,27 +730,23 @@ namespace api
 					}
 					else
 					{
-						ret["msg"] = "admin put error";
+						ret["msg"] = "admin update error";
 						ret["status"] = 0;
 					}
 				}
 				catch (const std::exception& e)
 				{
-					spdlog::warn("admin put error: {}", e.what());
+					spdlog::warn("admin update error: {}", e.what());
 					ret["msg"] = e.what();
 					ret["status"] = 0;
 				}
 				break;
 			case Post:
-				break;
-			case Delete:
-				if (type == "ingame")
+				stmt = fmt::format("DELETE FROM [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblRoleGroupMember] WHERE _UserNo = '{}'", (*json)["userNo"].asInt64());
+
+				if (type != "ingame")
 				{
-					stmt = fmt::format("DELETE FROM [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblRoleGroupMember] WHERE _UserNo = '{}'", (*json)["userNo"].asInt64());
-				}
-				else
-				{
-					stmt = fmt::format("DELETE FROM [SA_BETA_WORLDDB_0002].[PaWebPublic].[admin] WHERE id = '{}'", (*json)["id"].asString());
+					stmt = fmt::format("UPDATE [SA_BETA_WORLDDB_0002].[PaWebPublic].[account] SET [delete] = 1 WHERE id = '{}'", (*json)["id"].asString());
 				}
 
 				try
@@ -771,13 +760,13 @@ namespace api
 					}
 					else
 					{
-						ret["msg"] = "admin put error";
+						ret["msg"] = "admin delete error";
 						ret["status"] = 0;
 					}
 				}
 				catch (const std::exception& e)
 				{
-					spdlog::warn("admin put error: {}", e.what());
+					spdlog::warn("admin delete error: {}", e.what());
 					ret["msg"] = e.what();
 					ret["status"] = 0;
 				}
@@ -925,7 +914,7 @@ namespace api
 
 	Json::Value User::getPermission(const std::string userNo) const
 	{
-		auto stmt = fmt::format("SELECT * FROM [SA_BETA_WORLDDB_0002].[PaWebPublic].[account] WHERE userNo = '{}'", userNo);
+		auto stmt = fmt::format("SELECT * FROM [SA_BETA_WORLDDB_0002].[PaWebPublic].[account] WHERE [delete] = 0 AND userNo = '{}'", userNo);
 
 		Json::Value ret = {};
 
@@ -943,10 +932,10 @@ namespace api
 
 				if (r.rows() > 0)
 				{
-					auto permission = r.get<std::string>("value", "{}");
+					auto json = r.get<std::string>("value", "");
 
 					Json::Reader reader;
-					reader.parse(permission, ret);
+					reader.parse(json, ret);
 				}
 			}
 		}

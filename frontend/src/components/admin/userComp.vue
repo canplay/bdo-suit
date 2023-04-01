@@ -16,7 +16,7 @@
 
         <q-space class="col-auto" />
 
-        <q-input v-model="table.user.search" label="用户名" />
+        <q-input filled v-model="table.user.search" label="用户名" />
 
         <div class="col-auto" style="width: 8px" />
 
@@ -25,7 +25,7 @@
           color="secondary"
           label="发送邮件"
           :disable="table.user.selected.length === 0"
-          @click="userAction('mail')"
+          @click="dialog.mail.show = true"
         />
 
         <div class="col-auto" style="width: 8px" />
@@ -115,7 +115,7 @@
     separator="cell"
     v-model:pagination="table.gm.pagination"
     :filter="table.gm.filter"
-    @request="onRequest"
+    @request="onGmRequest"
     selection="multiple"
     v-model:selected="table.gm.selected"
   >
@@ -125,11 +125,21 @@
 
         <q-space class="col-auto" />
 
-        <q-btn class="col-1" color="secondary" label="添加" />
+        <q-btn
+          :disable="table.gm.selected.length === 0"
+          class="col-1"
+          color="negative"
+          label="删除"
+          @click="onGmDel"
+        />
 
         <div class="col-auto" style="width: 8px" />
 
-        <q-btn class="col-1" color="primary" label="删除" />
+        <q-btn class="col-1" color="secondary" label="添加" @click="onGmAdd" />
+
+        <div class="col-auto" style="width: 8px" />
+
+        <q-btn class="col-1" color="primary" label="查询" @click="onGmQuery" />
       </div>
     </template>
 
@@ -344,7 +354,15 @@
 
           <div class="col-auto" style="width: 8px" />
 
-          <q-input class="col" v-model="dialog.mail.variousNo" label="物品ID" />
+          <q-input class="col" v-model="dialog.mail.variousNo" label="物品ID">
+            <template v-slot:append>
+              <q-btn
+                color="primary"
+                label="ID列表"
+                @click="store.dialog.items = true"
+              />
+            </template>
+          </q-input>
         </div>
 
         <div style="height: 8px" />
@@ -384,15 +402,26 @@
     <q-card style="min-width: 80vw">
       <q-card-section class="text-h6">添加GM</q-card-section>
 
-      <q-card-section>
-        <q-input v-model="dialog.gm.id" label="ID" />
+      <q-card-section class="row">
+        <q-input class="col" v-model="dialog.gm.id" label="编号" />
+
+        <div class="col-auto" style="width: 8px" />
+
+        <q-select
+          class="col"
+          v-model="dialog.gm.level.model"
+          :options="dialog.gm.level.options"
+          label="等级"
+        />
       </q-card-section>
 
       <q-card-actions class="row">
-        <q-btn class="col" label="发送" color="primary" @click="onSendMail()" />
+        <q-btn class="col" label="保存" color="primary" @click="onGmSave()" />
       </q-card-actions>
     </q-card>
   </q-dialog>
+
+  <itemComp />
 </template>
 
 <script setup lang="ts">
@@ -400,6 +429,7 @@ import { ref } from 'vue';
 import { useQuasar, QTableProps } from 'quasar';
 import { useStore } from 'stores/store';
 import useFetch from 'src/components/fetch';
+import itemComp from 'src/components/itemComp.vue';
 
 const $q = useQuasar();
 const store = useStore();
@@ -516,9 +546,44 @@ const table = ref({
         sortable: true,
       },
       {
-        name: 'role',
-        label: '角色',
-        field: 'role',
+        name: 'permission',
+        label: '权限',
+        field: 'permission',
+        align: 'center',
+        sortable: true,
+      },
+      {
+        name: 'delete',
+        label: '是否删除',
+        field: 'delete',
+        align: 'center',
+        sortable: true,
+      },
+      {
+        name: 'create_user',
+        label: '创建人',
+        field: 'create_user',
+        align: 'center',
+        sortable: true,
+      },
+      {
+        name: 'create_date',
+        label: '创建时间',
+        field: 'create_date',
+        align: 'center',
+        sortable: true,
+      },
+      {
+        name: 'update_user',
+        label: '更新人',
+        field: 'update_user',
+        align: 'center',
+        sortable: true,
+      },
+      {
+        name: 'update_date',
+        label: '更新时间',
+        field: 'update_date',
         align: 'center',
         sortable: true,
       },
@@ -751,8 +816,8 @@ const dialog = ref({
     senderUserNo: '0',
     receiverName: '',
     receiverUserNo: '-1',
-    title: '测试邮件',
-    contents: '测试邮件内容',
+    title: 'GM邮件',
+    contents: 'GM邮件内容',
     mailType: '0',
     variousNo: '-1',
     enchantLevel: '0',
@@ -762,6 +827,13 @@ const dialog = ref({
   gm: {
     show: false,
     id: '',
+    level: {
+      model: { label: '普通用户', value: '7752a77001b84cdb8c0581a3b115190b' },
+      options: [
+        { label: '普通用户', value: '7752a77001b84cdb8c0581a3b115190b' },
+        { label: '管理员', value: '53a4d05b5f06f85e80ef548f509f2355' },
+      ],
+    },
   },
 });
 
@@ -885,18 +957,17 @@ const onSendMail = () => {
 
   $q.loading.show();
 
-  if (
-    dialog.value.mail.receiverName != '' ||
-    dialog.value.mail.receiverUserNo != '-1'
-  ) {
+  for (let index = 0; index < table.value.user.selected.length; index++) {
+    const element = table.value.user.selected[index];
+
     useFetch()
       .post(
         store.backend + '/api/user/mail',
         {
           senderName: dialog.value.mail.senderName,
           senderUserNo: parseInt(dialog.value.mail.senderUserNo),
-          receiverName: dialog.value.mail.receiverName,
-          receiverUserNo: parseInt(dialog.value.mail.receiverUserNo),
+          receiverName: element.userNickname,
+          receiverUserNo: parseInt(element.userNo),
           title: dialog.value.mail.title,
           contents: dialog.value.mail.contents,
           mailType: parseInt(dialog.value.mail.mailType),
@@ -921,43 +992,6 @@ const onSendMail = () => {
         $q.loading.hide();
         clearTimeout(time);
       });
-  } else {
-    for (let index = 0; index < table.value.user.selected.length; index++) {
-      const element = table.value.user.selected[index];
-
-      useFetch()
-        .post(
-          store.backend + '/api/user/mail',
-          {
-            senderName: dialog.value.mail.senderName,
-            senderUserNo: parseInt(dialog.value.mail.senderUserNo),
-            receiverName: element.userNickname,
-            receiverUserNo: parseInt(element.userNo),
-            title: dialog.value.mail.title,
-            contents: dialog.value.mail.contents,
-            mailType: parseInt(dialog.value.mail.mailType),
-            variousNo: parseInt(dialog.value.mail.variousNo),
-            enchantLevel: parseInt(dialog.value.mail.enchantLevel),
-            itemCount: parseInt(dialog.value.mail.itemCount),
-            webItemType: parseInt(dialog.value.mail.webItemType),
-            expirationDate: '',
-          },
-          $q.cookies.get('canplay_token')
-        )
-        .then((resp) => {
-          if (resp.data.status === 1) {
-            $q.notify('发送邮件成功');
-          }
-
-          $q.loading.hide();
-          clearTimeout(time);
-        })
-        .catch(() => {
-          $q.notify('网络错误，请稍后重试');
-          $q.loading.hide();
-          clearTimeout(time);
-        });
-    }
   }
 };
 
@@ -1046,72 +1080,171 @@ const onSave = () => {
     });
 };
 
-const userAction = (val: string) => {
-  switch (val) {
-    // case 'gm':
-    //   for (let index = 0; index < table.value.user.selected.length; index++) {
-    //     const element = table.value.user.selected[index];
-    //     useFetch()
-    //       .post(
-    //         store.backend + '/api/user/admin',
-    //         {
-    //           userNo: element.userNo,
-    //           mac: '00:00:00:00:00:00',
-    //           password: element.userId.split(',')[1],
-    //         },
-    //         $q.cookies.get('canplay_token')
-    //       )
-    //       .then((resp) => {
-    //         if (resp.data.status === 1) {
-    //           $q.notify('设置GM成功');
-    //         }
-    //       })
-    //       .catch(() => {
-    //         $q.notify('网络错误，请稍后重试');
-    //       });
-    //   }
-    //   break;
-    case 'gm':
-      let time = setTimeout(() => {
+const onGmRequest = (props: any) => {
+  let time = setTimeout(() => {
+    $q.loading.hide();
+    clearTimeout(time);
+  }, 120000);
+
+  $q.loading.show();
+
+  let { page, rowsPerPage, sortBy, descending, rowsNumber } = props.pagination;
+
+  table.value.gm.rows = [];
+
+  useFetch()
+    .post(
+      store.backend + '/api/user/admin/info/web',
+      {
+        curPage: (page - 1) * rowsPerPage,
+        maxPage: rowsPerPage === 0 ? rowsNumber : rowsPerPage,
+        sortBy: sortBy === '' ? 'userNo' : sortBy,
+        descending: descending,
+      },
+      $q.cookies.get('canplay_token')
+    )
+    .then((resp) => {
+      if (resp.data.status != 0) {
+        for (let i = 0; i < resp.data.msg.length; ++i) {
+          if (resp.data.msg[i].id === '') break;
+
+          table.value.gm.rows.push({
+            id: resp.data.msg[i].id,
+            userNo: resp.data.msg[i].userno,
+            permission: resp.data.msg[i].permission,
+            create_user: resp.data.msg[i].create_user,
+            create_date: resp.data.msg[i].create_date.replace(' +0800', ''),
+            update_user: resp.data.msg[i].update_user,
+            update_date: resp.data.msg[i].update_date.replace(' +0800', ''),
+            delete: resp.data.msg[i].delete,
+          });
+        }
+      } else {
+        $q.notify('网络错误，请稍后重试');
+      }
+
+      table.value.gm.pagination!.page = page;
+      table.value.gm.pagination!.rowsPerPage = rowsPerPage;
+      table.value.gm.pagination!.sortBy = sortBy;
+      table.value.gm.pagination!.descending = descending;
+
+      $q.loading.hide();
+      clearTimeout(time);
+    })
+    .catch(() => {
+      $q.notify('网络错误，请稍后重试');
+      $q.loading.hide();
+      clearTimeout(time);
+    });
+};
+
+const onGmQuery = () => {
+  let time = setTimeout(() => {
+    $q.loading.hide();
+    clearTimeout(time);
+  }, 120000);
+
+  $q.loading.show();
+
+  useFetch()
+    .get(
+      store.backend + '/api/user/admin/count/web',
+      $q.cookies.get('canplay_token')
+    )
+    .then((resp) => {
+      $q.loading.hide();
+      clearTimeout(time);
+
+      table.value.gm.pagination!.rowsNumber = parseInt(resp.data.msg);
+      onGmRequest({ pagination: table.value.gm.pagination });
+    })
+    .catch(() => {
+      $q.notify('网络错误，请稍后重试');
+      $q.loading.hide();
+      clearTimeout(time);
+    });
+};
+
+const onGmSave = () => {
+  let time = setTimeout(() => {
+    $q.loading.hide();
+    clearTimeout(time);
+  }, 120000);
+
+  $q.loading.show();
+
+  useFetch()
+    .put(
+      store.backend + '/api/user/admin/update/web',
+      {
+        userNo: parseInt(dialog.value.gm.id),
+        permission: dialog.value.gm.level.model.value,
+        create_user: store.user.userno.toString(),
+        update_user: store.user.userno.toString(),
+      },
+      $q.cookies.get('canplay_token')
+    )
+    .then((resp) => {
+      $q.loading.hide();
+      clearTimeout(time);
+
+      if (resp.data.status === 0) {
+        $q.notify(resp.data.msg);
+        return;
+      }
+
+      $q.notify('添加成功');
+      dialog.value.gm.show = false;
+      onGmQuery();
+    })
+    .catch(() => {
+      $q.notify('网络错误，请稍后重试');
+      $q.loading.hide();
+      clearTimeout(time);
+    });
+};
+
+const onGmAdd = () => {
+  dialog.value.gm.id = '';
+  dialog.value.gm.show = true;
+};
+
+const onGmDel = (val: any) => {
+  let time = setTimeout(() => {
+    $q.loading.hide();
+    clearTimeout(time);
+  }, 120000);
+
+  $q.loading.show();
+
+  for (let index = 0; index < table.value.gm.selected.length; index++) {
+    const element = table.value.gm.selected[index];
+
+    useFetch()
+      .post(
+        store.backend + '/api/user/admin/update/web',
+        {
+          id: element.id,
+        },
+        $q.cookies.get('canplay_token')
+      )
+      .then((resp) => {
         $q.loading.hide();
         clearTimeout(time);
-      }, 120000);
 
-      $q.loading.show();
+        if (resp.data.status === 0) {
+          $q.notify(resp.data.msg);
+          return;
+        }
 
-      for (let index = 0; index < table.value.user.selected.length; index++) {
-        const element = table.value.user.selected[index];
-        useFetch()
-          .post(
-            store.backend + '/api/user/admin',
-            {
-              username: element.userId.split(',')[0],
-              password: element.userId.split(',')[1],
-              userNo: element.userNo,
-              familyname: element.userNickname,
-              create_user: element.userno,
-              update_user: element.userno,
-            },
-            $q.cookies.get('canplay_token')
-          )
-          .then((resp) => {
-            if (resp.data.status === 1) {
-              $q.notify('设置个人GM成功');
-            }
-
-            $q.loading.hide();
-            clearTimeout(time);
-          })
-          .catch(() => {
-            $q.notify('网络错误，请稍后重试');
-            $q.loading.hide();
-            clearTimeout(time);
-          });
-      }
-      break;
-    case 'mail':
-      dialog.value.mail.show = true;
-      break;
+        $q.notify('删除成功');
+        onGmQuery();
+      })
+      .catch(() => {
+        $q.notify('网络错误，请稍后重试');
+        $q.loading.hide();
+        clearTimeout(time);
+      });
   }
 };
 </script>

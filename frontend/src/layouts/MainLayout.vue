@@ -41,14 +41,14 @@
         <div class="col-auto" style="width: 30px" />
 
         <q-btn
-          v-if="usePermission().check('bdo', 'admin')"
+          v-if="usePermission().check('admin')"
           flat
           label="管理面板"
           to="/admin"
         />
 
         <q-btn
-          v-if="usePermission().check('bdo', 'my')"
+          v-if="usePermission().check('my')"
           flat
           label="个人信息"
           to="/my"
@@ -83,7 +83,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useQuasar } from 'quasar';
 import { useStore } from 'src/stores/store';
@@ -107,35 +107,40 @@ const onGoto = (val: string) => {
   document.getElementById(val)?.scrollIntoView();
 };
 
-if ($q.cookies.has('canplay_token') && $q.cookies.get('canplay_token') != '') {
-  const id = jose.decodeJwt($q.cookies.get('canplay_token')).id;
+onMounted(() => {
+  if (
+    $q.cookies.has('canplay_token') &&
+    $q.cookies.get('canplay_token') != ''
+  ) {
+    const id = jose.decodeJwt($q.cookies.get('canplay_token')).id;
 
-  useFetch()
-    .get(
-      store.backend + '/api/user/info/' + id,
-      $q.cookies.get('canplay_token')
-    )
-    .then((resp) => {
-      if (resp.data.status === 0) {
-        $q.notify(resp.data.msg);
-        return;
-      }
+    useFetch()
+      .get(
+        store.backend + '/api/user/info/' + id,
+        $q.cookies.get('canplay_token')
+      )
+      .then((resp) => {
+        if (resp.data.status === 0) {
+          $q.notify(resp.data.msg);
+          return;
+        }
 
-      let username = resp.data.msg.userId.split(',');
+        let username = resp.data.msg.userId.split(',');
 
-      store.user = {
-        userno: resp.data.msg.userNo,
-        signin: true,
-        username: username[0],
-        password: username[1],
-        familyname: resp.data.msg.userNickname,
-        cash: 0,
-        pearl: 0,
-        permission: resp.data.msg.permission,
-      };
-    })
-    .catch(() => {
-      $q.notify('网络错误，请稍后重试');
-    });
-}
+        store.user = {
+          userno: resp.data.msg.userNo,
+          signin: true,
+          username: username[0],
+          password: username[1],
+          familyname: resp.data.msg.userNickname,
+          cash: 0,
+          pearl: 0,
+          permission: resp.data.msg.permission,
+        };
+      })
+      .catch(() => {
+        $q.notify('网络错误，请稍后重试');
+      });
+  }
+});
 </script>

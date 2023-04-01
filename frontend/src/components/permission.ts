@@ -3,39 +3,16 @@ import { useStore } from 'src/stores/store';
 export default function usePermission() {
   const store = useStore();
 
-  const check = (arg: string, ...args: string[]) => {
+  const check = (arg: string) => {
+    let ret = false;
+
     if (store.user.permission === null || store.user.permission === undefined) {
-      return false;
+      return ret;
     }
 
-    const p1: any = store.user.permission[arg];
+    if (store.user.permission[arg]) ret = true;
 
-    for (let index = 0; index < args.length; index++) {
-      const element = args[index];
-
-      console.log(p1[element]);
-      if (
-        p1 === null ||
-        p1 === undefined ||
-        p1[element] === null ||
-        p1[element] === undefined
-      ) {
-        return false;
-      }
-
-      const p2: any = p1[element];
-
-      if (
-        p2 === null ||
-        p2 === undefined ||
-        p2[element] === null ||
-        p2[element] === undefined
-      ) {
-        return false;
-      }
-    }
-
-    return true;
+    return ret;
   };
 
   return { check };

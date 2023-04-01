@@ -168,6 +168,7 @@ echo f | xcopy /y "$(VcpkgRoot)\installed\x64-windows\tools\crashpad_handler.exe
     <ClCompile Include="common\src\jwt.cpp" />
     <ClCompile Include="common\src\node_blf.cpp" />
     <ClCompile Include="common\src\utility.cpp" />
+    <ClCompile Include="src\items.cpp" />
     <ClCompile Include="src\link.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\mssql.cpp" />
@@ -189,6 +190,7 @@ echo f | xcopy /y "$(VcpkgRoot)\installed\x64-windows\tools\crashpad_handler.exe
     <ClInclude Include="common\include\openbsd.h" />
     <ClInclude Include="common\include\utility.h" />
     <ClInclude Include="common\include\uuid.h" />
+    <ClInclude Include="include\items.h" />
     <ClInclude Include="include\link.h" />
     <ClInclude Include="include\mssql.h" />
     <ClInclude Include="include\news.h" />
