@@ -53,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useQuasar } from 'quasar';
 import { useStore } from 'stores/store';
 import useFetch from 'src/components/fetch';
@@ -74,10 +74,18 @@ const gameInfo = ref({
   },
 });
 
-useFetch()
-  .get(store.backend + '/api/status/overview', $q.cookies.get('canplay_token'))
-  .then((resp) => {
-    if (resp.data.status === 1) {
+onMounted(() => {
+  useFetch()
+    .get(
+      store.backend + '/api/status/overview',
+      $q.cookies.get('canplay_token')
+    )
+    .then((resp) => {
+      if (resp.data.status === 0) {
+        $q.notify(resp.data.msg);
+        return;
+      }
+
       gameInfo.value.account = resp.data.msg.account;
       gameInfo.value.character = resp.data.msg.character;
       gameInfo.value.guild = resp.data.msg.guild;
@@ -101,9 +109,9 @@ useFetch()
         }
       }
       world = server = [];
-    }
-  })
-  .catch(() => {
-    $q.notify('网络错误，请稍后重试');
-  });
+    })
+    .catch(() => {
+      $q.notify('网络错误，请稍后重试');
+    });
+});
 </script>

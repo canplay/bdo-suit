@@ -680,6 +680,7 @@ const onSignin = () => {
         cash: 0,
         pearl: 0,
         permission: resp.data.msg.permission,
+        characters: [],
       };
 
       $q.loading.hide();
@@ -704,6 +705,7 @@ const onSignup = () => {
       cash: 0,
       pearl: 0,
       permission: {},
+      characters: [],
     };
   } else {
     let time = setTimeout(() => {
@@ -737,6 +739,7 @@ const onSignup = () => {
           cash: 0,
           pearl: 0,
           permission: resp.data.msg.permission,
+          characters: resp.data.msg.characters,
         };
 
         $q.loading.hide();

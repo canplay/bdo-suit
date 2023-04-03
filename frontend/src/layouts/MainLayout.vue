@@ -136,6 +136,7 @@ onMounted(() => {
           cash: 0,
           pearl: 0,
           permission: resp.data.msg.permission,
+          characters: resp.data.msg.characters,
         };
       })
       .catch(() => {

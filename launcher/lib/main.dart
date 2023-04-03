@@ -6,7 +6,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:logger/logger.dart';
 import 'package:process_run/shell.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: const MyHomePage(),
-      builder: FlutterSmartDialog.init(),
+      builder: EasyLoading.init(),
     );
   }
 }
@@ -71,8 +71,8 @@ class _MyHomePageState extends State<MyHomePage>
   var autoLogin = false;
   var logined = false;
   Map<String, dynamic> version = {
-    'app': '2023.03.090',
-    'resource': '2023.03.090',
+    'app': '2023.4.001',
+    'resource': '2023.02.019',
   };
   Map<String, dynamic> remoteVersion = {
     'app': {
@@ -180,8 +180,8 @@ class _MyHomePageState extends State<MyHomePage>
           },
           options: Options(contentType: "application/json"));
 
-      if (resp.data["status"] != 1) {
-        SmartDialog.showToast(resp.data["msg"]);
+      if (resp.data["status"] == 0) {
+        EasyLoading.showError(resp.data["msg"]);
         return;
       }
 
@@ -211,8 +211,8 @@ class _MyHomePageState extends State<MyHomePage>
       Response resp = await dio.get("$remoteUrl/api/news/latest",
           options: Options(contentType: "application/json"));
 
-      if (resp.data["status"] != 1) {
-        SmartDialog.showToast(resp.data["msg"]);
+      if (resp.data["status"] == 0) {
+        EasyLoading.showError(resp.data["msg"]);
         return;
       }
 
@@ -305,10 +305,7 @@ class _MyHomePageState extends State<MyHomePage>
   }
 
   void runGame() async {
-    SmartDialog.showLoading(
-      msg: "正在启动游戏...",
-      displayTime: const Duration(seconds: 10),
-    );
+    EasyLoading.show(status: "正在启动游戏...");
 
     // final r = ShellExecute(
     //   0,
@@ -365,16 +362,16 @@ class _MyHomePageState extends State<MyHomePage>
         'start BlackDesert64.exe ${usernameController.text},${passwordController.text}');
 
     if (r.last.exitCode <= 0) {
-      SmartDialog.dismiss();
-      SmartDialog.showToast('启动游戏失败');
+      EasyLoading.dismiss();
+      EasyLoading.showError('启动游戏失败');
     } else {
-      SmartDialog.dismiss();
+      EasyLoading.dismiss();
     }
   }
 
   Future<void> onLogin() async {
     try {
-      SmartDialog.showLoading(msg: "正在登陆...");
+      EasyLoading.show(status: "正在登陆...");
 
       Response resp = await dio.post(
         "$remoteUrl/api/user/signin",
@@ -385,10 +382,10 @@ class _MyHomePageState extends State<MyHomePage>
         options: Options(contentType: "application/json"),
       );
 
-      SmartDialog.dismiss();
+      EasyLoading.dismiss();
 
-      if (resp.data["status"] != 1) {
-        SmartDialog.showToast(resp.data["msg"]);
+      if (resp.data["status"] == 0) {
+        EasyLoading.showError(resp.data["msg"]);
         return;
       }
 
@@ -499,7 +496,7 @@ class _MyHomePageState extends State<MyHomePage>
       });
 
       if (resp.statusCode != 200) {
-        SmartDialog.showToast('获取更新失败');
+        EasyLoading.showError('获取更新失败');
         return false;
       }
 
@@ -547,8 +544,8 @@ class _MyHomePageState extends State<MyHomePage>
       Response resp = await dio.get("$remoteUrl/api/version/latest",
           options: Options(contentType: "application/json"));
 
-      if (resp.data["status"] != 1) {
-        SmartDialog.showToast(resp.data["msg"]);
+      if (resp.data["status"] == 0) {
+        EasyLoading.showError(resp.data["msg"]);
         return;
       }
 
@@ -874,9 +871,9 @@ class _MyHomePageState extends State<MyHomePage>
                                     const SizedBox(
                                       height: 8,
                                     ),
-                                    Text(
-                                      "会员等级: ${user['membershipType']}",
-                                      style: const TextStyle(
+                                    const Text(
+                                      "虚拟币: 0",
+                                      style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 16,
                                         fontFamily: '微软雅黑',
@@ -885,9 +882,9 @@ class _MyHomePageState extends State<MyHomePage>
                                     const SizedBox(
                                       height: 8,
                                     ),
-                                    Text(
-                                      "游玩时长: ${user['totalPlayTime']}",
-                                      style: const TextStyle(
+                                    const Text(
+                                      "珍珠: 0",
+                                      style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 16,
                                         fontFamily: '微软雅黑',
@@ -980,145 +977,142 @@ class _MyHomePageState extends State<MyHomePage>
                             ),
                           ),
                           onPressed: () {
-                            SmartDialog.show(
-                              builder: (context) {
-                                return Container(
-                                  height: 140,
-                                  width: 600,
-                                  decoration: BoxDecoration(
-                                    color: const Color.fromARGB(
-                                        250, 255, 255, 255),
-                                    borderRadius: BorderRadius.circular(5),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Expanded(
-                                        child: Card(
-                                          color: Colors.black,
-                                          child: TabBar(
-                                            controller: tabController,
-                                            tabs: myTabs,
-                                          ),
+                            EasyLoading.show(
+                              indicator: Container(
+                                height: 140,
+                                width: 600,
+                                decoration: BoxDecoration(
+                                  color:
+                                      const Color.fromARGB(250, 255, 255, 255),
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Expanded(
+                                      child: Card(
+                                        color: Colors.black,
+                                        child: TabBar(
+                                          controller: tabController,
+                                          tabs: myTabs,
                                         ),
                                       ),
-                                      SizedBox(
-                                        height: 80,
-                                        child: TabBarView(
-                                          controller: tabController,
-                                          children: myTabs.map((Tab tab) {
-                                            switch (myTabs.indexOf(tab)) {
-                                              case 0:
-                                                return Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(8),
-                                                  child: Column(
-                                                    children: [
-                                                      Row(
-                                                        children: [
-                                                          Expanded(
-                                                            flex: 10,
-                                                            child: TextField(
-                                                              controller:
-                                                                  clientPathController,
-                                                              style: const TextStyle(
-                                                                  color: Colors
-                                                                      .black),
-                                                              decoration:
-                                                                  const InputDecoration(
-                                                                border:
-                                                                    OutlineInputBorder(),
-                                                                enabledBorder:
-                                                                    OutlineInputBorder(
-                                                                  borderSide:
-                                                                      BorderSide(
+                                    ),
+                                    SizedBox(
+                                      height: 80,
+                                      child: TabBarView(
+                                        controller: tabController,
+                                        children: myTabs.map((Tab tab) {
+                                          switch (myTabs.indexOf(tab)) {
+                                            case 0:
+                                              return Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8),
+                                                child: Column(
+                                                  children: [
+                                                    Row(
+                                                      children: [
+                                                        Expanded(
+                                                          flex: 10,
+                                                          child: TextField(
+                                                            controller:
+                                                                clientPathController,
+                                                            style:
+                                                                const TextStyle(
                                                                     color: Colors
-                                                                        .black,
-                                                                  ),
-                                                                ),
-                                                                labelText:
-                                                                    '黑色沙漠客户端位置',
-                                                                labelStyle:
-                                                                    TextStyle(
+                                                                        .black),
+                                                            decoration:
+                                                                const InputDecoration(
+                                                              border:
+                                                                  OutlineInputBorder(),
+                                                              enabledBorder:
+                                                                  OutlineInputBorder(
+                                                                borderSide:
+                                                                    BorderSide(
                                                                   color: Colors
                                                                       .black,
-                                                                  fontFamily:
-                                                                      '微软雅黑',
                                                                 ),
+                                                              ),
+                                                              labelText:
+                                                                  '黑色沙漠客户端位置',
+                                                              labelStyle:
+                                                                  TextStyle(
+                                                                color: Colors
+                                                                    .black,
+                                                                fontFamily:
+                                                                    '微软雅黑',
                                                               ),
                                                             ),
                                                           ),
-                                                          const SizedBox(
-                                                            width: 8,
-                                                          ),
-                                                          SizedBox(
-                                                            width: 140,
-                                                            height: 60,
-                                                            child:
-                                                                ElevatedButton(
-                                                              onPressed:
-                                                                  () async {
-                                                                var selected =
-                                                                    await FilePicker
-                                                                        .platform
-                                                                        .getDirectoryPath();
+                                                        ),
+                                                        const SizedBox(
+                                                          width: 8,
+                                                        ),
+                                                        SizedBox(
+                                                          width: 140,
+                                                          height: 60,
+                                                          child: ElevatedButton(
+                                                            onPressed:
+                                                                () async {
+                                                              var selected =
+                                                                  await FilePicker
+                                                                      .platform
+                                                                      .getDirectoryPath();
 
-                                                                if (selected !=
-                                                                    null) {
-                                                                  setState(() {
-                                                                    clientPathController
-                                                                            .text =
-                                                                        selected;
-                                                                  });
-                                                                }
-                                                              },
-                                                              child: const Text(
-                                                                '选择',
-                                                                style:
-                                                                    TextStyle(
-                                                                  fontSize: 24,
-                                                                  fontFamily:
-                                                                      '微软雅黑',
-                                                                ),
+                                                              if (selected !=
+                                                                  null) {
+                                                                setState(() {
+                                                                  clientPathController
+                                                                          .text =
+                                                                      selected;
+                                                                });
+                                                              }
+                                                            },
+                                                            child: const Text(
+                                                              '选择',
+                                                              style: TextStyle(
+                                                                fontSize: 24,
+                                                                fontFamily:
+                                                                    '微软雅黑',
                                                               ),
                                                             ),
                                                           ),
-                                                        ],
-                                                      ),
-                                                    ],
-                                                  ),
-                                                );
-                                              case 1:
-                                                return const Center(
-                                                  child: Text(
-                                                    'This is 1 tab',
-                                                    style:
-                                                        TextStyle(fontSize: 36),
-                                                  ),
-                                                );
-                                              case 2:
-                                                return const Center(
-                                                  child: Text(
-                                                    'This is 2 tab',
-                                                    style:
-                                                        TextStyle(fontSize: 36),
-                                                  ),
-                                                );
-                                              default:
-                                                return const Center(
-                                                  child: Text(
-                                                    '错误',
-                                                    style:
-                                                        TextStyle(fontSize: 36),
-                                                  ),
-                                                );
-                                            }
-                                          }).toList(),
-                                        ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            case 1:
+                                              return const Center(
+                                                child: Text(
+                                                  'This is 1 tab',
+                                                  style:
+                                                      TextStyle(fontSize: 36),
+                                                ),
+                                              );
+                                            case 2:
+                                              return const Center(
+                                                child: Text(
+                                                  'This is 2 tab',
+                                                  style:
+                                                      TextStyle(fontSize: 36),
+                                                ),
+                                              );
+                                            default:
+                                              return const Center(
+                                                child: Text(
+                                                  '错误',
+                                                  style:
+                                                      TextStyle(fontSize: 36),
+                                                ),
+                                              );
+                                          }
+                                        }).toList(),
                                       ),
-                                    ],
-                                  ),
-                                );
-                              },
+                                    ),
+                                  ],
+                                ),
+                              ),
                             );
                           },
                         ),
@@ -1165,12 +1159,12 @@ class _MyHomePageState extends State<MyHomePage>
                               : () async {
                                   if (usernameController.value.text.isEmpty ||
                                       passwordController.value.text.isEmpty) {
-                                    SmartDialog.showToast("用户名或密码不能为空");
+                                    EasyLoading.showError("用户名或密码不能为空");
                                     return;
                                   }
 
                                   if (clientPathController.value.text.isEmpty) {
-                                    SmartDialog.showToast("请先点击设置选择客户端所在的目录");
+                                    EasyLoading.showError("请先点击设置选择客户端所在的目录");
                                     return;
                                   }
 

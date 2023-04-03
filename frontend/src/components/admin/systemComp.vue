@@ -403,12 +403,15 @@ const onDel = () => {
       $q.cookies.get('canplay_token')
     )
     .then((resp) => {
-      if (resp.data.status === 1) {
-        onQuery();
-      }
-
       $q.loading.hide();
       clearTimeout(time);
+
+      if (resp.data.status === 0) {
+        $q.notify(resp.data.msg);
+        return;
+      }
+
+      onQuery();
     })
     .catch(() => {
       $q.notify('网络错误，请稍后重试');
@@ -446,12 +449,15 @@ const onSave = () => {
         $q.cookies.get('canplay_token')
       )
       .then((resp) => {
-        if (resp.data.status === 1) {
-          onQuery();
-        }
-
         $q.loading.hide();
         clearTimeout(time);
+
+        if (resp.data.status === 0) {
+          $q.notify(resp.data.msg);
+          return;
+        }
+
+        onQuery();
       })
       .catch(() => {
         $q.notify('网络错误，请稍后重试');
@@ -477,12 +483,15 @@ const onSave = () => {
         $q.cookies.get('canplay_token')
       )
       .then((resp) => {
-        if (resp.data.status === 1) {
-          onQuery();
-        }
-
         $q.loading.hide();
         clearTimeout(time);
+
+        if (resp.data.status === 0) {
+          $q.notify(resp.data.msg);
+          return;
+        }
+
+        onQuery();
       })
       .catch(() => {
         $q.notify('网络错误，请稍后重试');

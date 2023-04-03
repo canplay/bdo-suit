@@ -3,14 +3,23 @@
     <div class="row q-gutter-md">
       <q-card
         class="col-auto"
-        style="width: 100%; max-width: 250px"
-        v-for="item in characters"
+        style="width: 100%; max-width: 400px"
+        v-for="item in store.user.characters"
         :key="item"
       >
-        <q-img src="https://cdn.quasar.dev/img/parallax2.jpg" />
+        <q-img src="imgs/logo.png" />
 
         <q-card-section>
-          <div class="text-h6">角色名: {{ item.characterName }}</div>
+          <div class="row">
+            <div class="col text-h6">角色名: {{ item.characterName }}</div>
+            <q-btn
+              class="col"
+              color="primary"
+              label="自助修改"
+              @click="onDialog(item)"
+            />
+          </div>
+
           <div class="row">
             <div class="col text-caption">等级: {{ item.level }}</div>
             <div class="col text-caption">
@@ -116,6 +125,31 @@
     </q-card>
   </q-page>
 
+  <q-dialog v-model="dialog.show">
+    <q-card>
+      <q-card-section class="text-h6">修改角色名</q-card-section>
+
+      <q-card-section>
+        <q-input v-model="dialog.name" label="角色名" />
+
+        <q-input v-model="dialog.x" label="坐标X" />
+
+        <q-input v-model="dialog.y" label="坐标Y" />
+
+        <q-input v-model="dialog.z" label="坐标Z" />
+      </q-card-section>
+
+      <q-card-actions>
+        <q-btn
+          class="fit"
+          color="primary"
+          label="确定"
+          @click="onCharacterModify()"
+        />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+
   <itemComp />
 </template>
 
@@ -125,6 +159,7 @@ import { useQuasar } from 'quasar';
 import useFetch from 'src/components/fetch';
 import { useStore } from 'src/stores/store';
 import itemComp from 'src/components/itemComp.vue';
+import * as jose from 'jose';
 
 const $q = useQuasar();
 const store = useStore();
@@ -134,15 +169,61 @@ const account = ref({
   password: '',
   familyName: '',
 });
-const characters = ref([] as any);
+
 const mail = ref({
   variousNo: '',
   enchantLevel: '0',
   itemCount: '0',
 });
 
+const dialog = ref({
+  show: false,
+  character: {} as any,
+  name: '',
+  x: '',
+  y: '',
+  z: '',
+});
+
 const onUpdateInfo = () => {
-  return;
+  let time = setTimeout(() => {
+    $q.loading.hide();
+    clearTimeout(time);
+  }, 120000);
+
+  $q.loading.show();
+
+  useFetch()
+    .post(
+      store.backend + '/api/user/update',
+      {
+        userNo: store.user.userno,
+        username: account.value.username,
+        password: account.value.password,
+        userNickname: account.value.familyName,
+        isValid: 1,
+        pcroom: 1,
+        membershipType: 0,
+      },
+      $q.cookies.get('canplay_token')
+    )
+    .then((resp) => {
+      $q.loading.hide();
+      clearTimeout(time);
+
+      if (resp.data.status === 0) {
+        $q.notify(resp.data.msg);
+        return;
+      }
+
+      refrashUserInfo();
+      $q.notify('修改成功');
+    })
+    .catch(() => {
+      $q.notify('网络错误，请稍后重试');
+      $q.loading.hide();
+      clearTimeout(time);
+    });
 };
 
 const onSendMail = () => {
@@ -157,31 +238,24 @@ const onSendMail = () => {
     .post(
       store.backend + '/api/user/mail',
       {
-        senderName: '自助邮件',
-        senderUserNo: 0,
         receiverName: store.user.username,
         receiverUserNo: store.user.userno,
-        title: '自助邮件',
-        contents: '自助邮件',
-        mailType: 0,
         variousNo: parseInt(mail.value.variousNo),
         enchantLevel: parseInt(mail.value.enchantLevel),
-        itemCount:
-          parseInt(mail.value.itemCount) >= 1000
-            ? 1000
-            : parseInt(mail.value.itemCount),
-        webItemType: 0,
-        expirationDate: '',
+        itemCount: parseInt(mail.value.itemCount),
       },
       $q.cookies.get('canplay_token')
     )
     .then((resp) => {
-      if (resp.data.status === 1) {
-        $q.notify('发送邮件成功');
-      }
-
       $q.loading.hide();
       clearTimeout(time);
+
+      if (resp.data.status === 0) {
+        $q.notify(resp.data.msg);
+        return;
+      }
+
+      $q.notify('发送邮件成功');
     })
     .catch(() => {
       $q.notify('网络错误，请稍后重试');
@@ -190,27 +264,89 @@ const onSendMail = () => {
     });
 };
 
-onMounted(() => {
-  for (let index = 0; index < 1; index++) {
-    characters.value.push({
-      characterName: index,
-      level: 1,
-      classType: 1,
-      totalPlayTime: 1,
-      experience: 1,
-      tendency: 1,
-      variedWeight: 1,
-      inventorySlotCount: 1,
-      hp: 1,
-      mp: 1,
-      sp: 1,
-      wp: 1,
-      titleKey: 1,
-      defenceValue: 1,
-      offenceValue: 1,
-      awakenValue: 1,
-      expanded: false,
+const onDialog = (val: any) => {
+  dialog.value.character = val;
+  dialog.value.name = val.characterName;
+  dialog.value.x = val.currentPositionX;
+  dialog.value.y = val.currentPositionY;
+  dialog.value.z = val.currentPositionZ;
+  dialog.value.show = true;
+};
+
+const onCharacterModify = () => {
+  let time = setTimeout(() => {
+    $q.loading.hide();
+    clearTimeout(time);
+  }, 120000);
+
+  $q.loading.show();
+
+  useFetch()
+    .post(
+      store.backend + '/api/user/character/update',
+      {
+        characterNo: dialog.value.character.characterNo,
+        characterName: dialog.value.name,
+        currentPositionX: parseInt(dialog.value.x),
+        currentPositionY: parseInt(dialog.value.y),
+        currentPositionZ: parseInt(dialog.value.z),
+      },
+      $q.cookies.get('canplay_token')
+    )
+    .then((resp) => {
+      $q.loading.hide();
+      clearTimeout(time);
+
+      if (resp.data.status === 0) {
+        $q.notify(resp.data.msg);
+        return;
+      }
+
+      refrashUserInfo();
+      dialog.value.show = false;
+      $q.notify('修改成功');
+    })
+    .catch(() => {
+      $q.notify('网络错误，请稍后重试');
     });
-  }
+};
+
+const refrashUserInfo = () => {
+  const id = jose.decodeJwt($q.cookies.get('canplay_token')).id;
+
+  useFetch()
+    .get(
+      store.backend + '/api/user/info/' + id,
+      $q.cookies.get('canplay_token')
+    )
+    .then((resp) => {
+      if (resp.data.status === 0) {
+        $q.notify(resp.data.msg);
+        return;
+      }
+
+      let username = resp.data.msg.userId.split(',');
+
+      store.user = {
+        userno: resp.data.msg.userNo,
+        signin: true,
+        username: account.value.username,
+        password: account.value.password,
+        familyname: resp.data.msg.userNickname,
+        cash: 0,
+        pearl: 0,
+        permission: resp.data.msg.permission,
+        characters: resp.data.msg.characters,
+      };
+    })
+    .catch(() => {
+      $q.notify('网络错误，请稍后重试');
+    });
+};
+
+onMounted(() => {
+  account.value.username = store.user.username;
+  account.value.password = store.user.password;
+  account.value.familyName = store.user.familyname;
 });
 </script>

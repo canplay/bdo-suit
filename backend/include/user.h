@@ -19,12 +19,15 @@ namespace api
 		METHOD_ADD(User::update, "/update", Options, Post, "api::JwtFilter");
 		METHOD_ADD(User::characterUpdate, "/character/update", Options, Post, "api::JwtFilter");
 		METHOD_ADD(User::mail, "/mail", Options, Post, "api::JwtFilter");
-		METHOD_ADD(User::adminCount, "/admin/count/{type}", Options, Get, "api::JwtFilter");
-		METHOD_ADD(User::adminInfo, "/admin/info/{type}", Options, Post, "api::JwtFilter");
-		METHOD_ADD(User::adminUpdate, "/admin/update/{type}", Options, Put, Post, "api::JwtFilter");
-		METHOD_ADD(User::blockChat, "/blockchat", Options, Post, "api::JwtFilter");
-		METHOD_ADD(User::blockUser, "/blockuser", Options, Post, "api::JwtFilter");
-		METHOD_ADD(User::blockIp, "/blockip", Options, Post, "api::JwtFilter");
+		METHOD_ADD(User::adminUpdate, "/admin/update", Options, Post, "api::JwtFilter");
+		METHOD_ADD(User::adminCharacterUpdate, "/admin/character/update", Options, Post, "api::JwtFilter");
+		METHOD_ADD(User::adminMail, "/admin/mail", Options, Post, "api::JwtFilter");
+		METHOD_ADD(User::adminGmCount, "/admin/gm/count/{type}", Options, Get, "api::JwtFilter");
+		METHOD_ADD(User::adminGmInfo, "/admin/gm/info/{type}", Options, Post, "api::JwtFilter");
+		METHOD_ADD(User::adminGmUpdate, "/admin/gm/update/{type}", Options, Put, Post, "api::JwtFilter");
+		METHOD_ADD(User::blockChat, "/admin/blockchat", Options, Post, "api::JwtFilter");
+		METHOD_ADD(User::blockUser, "/admin/blockuser", Options, Post, "api::JwtFilter");
+		METHOD_ADD(User::blockIp, "/admin/blockip", Options, Post, "api::JwtFilter");
 		METHOD_LIST_END
 
 	public:
@@ -40,17 +43,23 @@ namespace api
 
 		void infoOne(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, const std::string& id) const;
 
+		void mail(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const;
+
 		void update(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const;
 
 		void characterUpdate(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const;
 
-		void mail(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const;
+		void adminUpdate(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const;
 
-		void adminCount(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, const std::string type) const;
+		void adminCharacterUpdate(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const;
 
-		void adminInfo(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, const std::string type) const;
+		void adminMail(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const;
 
-		void adminUpdate(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, const std::string type) const;
+		void adminGmCount(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, const std::string type) const;
+
+		void adminGmInfo(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, const std::string type) const;
+
+		void adminGmUpdate(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, const std::string type) const;
 
 		void blockChat(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const;
 

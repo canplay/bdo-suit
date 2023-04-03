@@ -90,12 +90,14 @@ const onRequest = (props: any) => {
       $q.cookies.get('canplay_token')
     )
     .then((resp) => {
+      $q.loading.hide();
+      clearTimeout(time);
+
       table.value.pagination!.rowsNumber = parseInt(resp.data.msg);
 
-      if (parseInt(resp.data.msg) <= 0) {
-        $q.loading.hide();
-        clearTimeout(time);
+      if (resp.data.status === 0 || parseInt(resp.data.msg) <= 0) {
         $q.notify('没有找到物品');
+        return;
       }
 
       useFetch()

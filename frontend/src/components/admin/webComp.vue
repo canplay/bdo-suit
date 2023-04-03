@@ -876,12 +876,15 @@ const onDel = (val: string) => {
           $q.cookies.get('canplay_token')
         )
         .then((resp) => {
-          if (resp.data.status === 1) {
-            onNewsQuery();
-          }
-
           $q.loading.hide();
           clearTimeout(time);
+
+          if (resp.data.status === 0) {
+            $q.notify(resp.data.msg);
+            return;
+          }
+
+          onNewsQuery();
         })
         .catch(() => {
           $q.notify('网络错误，请稍后重试');
@@ -919,12 +922,15 @@ const onSave = (val: string) => {
             $q.cookies.get('canplay_token')
           )
           .then((resp) => {
-            if (resp.data.status === 1) {
-              onNewsQuery();
-            }
-
             $q.loading.hide();
             clearTimeout(time);
+
+            if (resp.data.status === 0) {
+              $q.notify(resp.data.msg);
+              return;
+            }
+
+            onNewsQuery();
           })
           .catch(() => {
             $q.notify('网络错误，请稍后重试');
@@ -947,12 +953,15 @@ const onSave = (val: string) => {
             $q.cookies.get('canplay_token')
           )
           .then((resp) => {
-            if (resp.data.status === 1) {
-              onNewsQuery();
-            }
-
             $q.loading.hide();
             clearTimeout(time);
+
+            if (resp.data.status === 0) {
+              $q.notify(resp.data.msg);
+              return;
+            }
+
+            onNewsQuery();
           })
           .catch(() => {
             $q.notify('网络错误，请稍后重试');
@@ -978,12 +987,15 @@ const onSave = (val: string) => {
           $q.cookies.get('canplay_token')
         )
         .then((resp) => {
-          if (resp.data.status === 1) {
-            onSlideQuery();
-          }
-
           $q.loading.hide();
           clearTimeout(time);
+
+          if (resp.data.status === 0) {
+            $q.notify(resp.data.msg);
+            return;
+          }
+
+          onSlideQuery();
         })
         .catch(() => {
           $q.notify('网络错误，请稍后重试');
@@ -1006,12 +1018,15 @@ const onSave = (val: string) => {
           $q.cookies.get('canplay_token')
         )
         .then((resp) => {
-          if (resp.data.status === 1) {
-            onLinkQuery();
-          }
-
           $q.loading.hide();
           clearTimeout(time);
+
+          if (resp.data.status === 0) {
+            $q.notify(resp.data.msg);
+            return;
+          }
+
+          onLinkQuery();
         })
         .catch(() => {
           $q.notify('网络错误，请稍后重试');

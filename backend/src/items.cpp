@@ -57,6 +57,11 @@ namespace api
 
 		std::string stmt = fmt::format("SELECT TOP {} * FROM [SA_BETA_WORLDDB_0002].[PaWebPublic].[items] WHERE id NOT IN(SELECT TOP {} id FROM [SA_BETA_WORLDDB_0002].[PaWebPublic].[items]", (*json)["maxPage"].asInt64(), (*json)["curPage"].asInt64());
 
+		if ((*json)["filter"].asString() != "")
+		{
+			stmt = fmt::format("{} WHERE [name] LIKE N'%{}%'", stmt, utf8ToGBK((*json)["filter"].asString()));
+		}
+
 		if ((*json)["sortBy"].asString() != "")
 		{
 			stmt = fmt::format("{} ORDER BY [{}] DESC) AND [name] LIKE N'%{}%' ORDER BY [{}]", stmt, (*json)["sortBy"].asString(), utf8ToGBK((*json)["filter"].asString()), (*json)["sortBy"].asString());

@@ -36,7 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   window_manager:
   dio:
-  flutter_smart_dialog:
+  flutter_easyloading:
   package_info_plus:
   version:
   carousel_slider:

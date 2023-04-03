@@ -385,6 +385,50 @@ namespace api
 		callback(HttpResponse::newHttpJsonResponse(ret));
 	}
 
+	void User::mail(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const
+	{
+		std::shared_ptr<Json::Value> json = req->getJsonObject();
+		if (!json)
+		{
+			Json::Value ret;
+			ret["msg"] = "error";
+			ret["status"] = 0;
+			return callback(HttpResponse::newHttpJsonResponse(ret));
+		}
+
+		auto now = std::chrono::system_clock::now();
+		time_t time = std::chrono::system_clock::to_time_t(now);
+		auto timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(time));
+
+		auto stmt = fmt::format("INSERT INTO [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblMail] ([_registerDate], [_senderName], [_senderUserNo], [_receiverName], [_receiverUserNo], [_title], [_contents], [_mailType], [_variousNo], [_enchantLevel], [_itemCount], [_webItemType], [_chargeNo]) VALUES ('{}', N'自助邮件', 0, N'{}', {}, N'自助邮件', N'自助邮件', 0, {}, {}, {}, 0, '')", timestamp, (*json)["receiverName"].asString(), (*json)["receiverUserNo"].asInt64(), (*json)["variousNo"].asInt64(), (*json)["enchantLevel"].asInt64(), (*json)["itemCount"].asInt64());
+
+		Json::Value ret;
+
+		try
+		{
+			auto r = MsSql::exec(stmt);
+
+			if (r.affected_rows() == 1)
+			{
+				ret["msg"] = "ok";
+				ret["status"] = 1;
+			}
+			else
+			{
+				ret["msg"] = "mail add error";
+				ret["status"] = 0;
+			}
+		}
+		catch (const std::exception& e)
+		{
+			spdlog::warn("mail add error: {}", e.what());
+			ret["msg"] = e.what();
+			ret["status"] = 0;
+		}
+
+		callback(HttpResponse::newHttpJsonResponse(ret));
+	}
+
 	void User::update(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const
 	{
 		std::shared_ptr<Json::Value> json = req->getJsonObject();
@@ -400,17 +444,45 @@ namespace api
 		time_t time = std::chrono::system_clock::to_time_t(now);
 		auto timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(time));
 
-		auto stmt1 = fmt::format("UPDATE [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblUserInformation] SET [_isValid] = '{}', [_userId] = N'{},{}', [_userNickname] = N'{}', [_isPcRoom] = {}, [_membershipType] = {} WHERE [_userNo] = {}", (*json)["isValid"].asInt64(), (*json)["username"].asString(), (*json)["password"].asString(), (*json)["userNickname"].asString(), (*json)["pcroom"].asInt64(), (*json)["membershipType"].asInt64(), (*json)["userNo"].asInt64());
+		auto stmt1 = fmt::format("UPDATE [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblUserInformation] SET [_userId] = N'{},{}', [_userNickname] = N'{}' WHERE [_userNo] = {}", (*json)["username"].asString(), (*json)["password"].asString(), utf8ToGBK((*json)["userNickname"].asString()), (*json)["userNo"].asInt64());
 
-		auto stmt2 = fmt::format("UPDATE [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblBriefUserInformation] SET [_userId] = N'{},{}', [_userNickname] = N'{}' WHERE [_userNo] = {}", (*json)["username"].asString(), (*json)["password"].asString(), (*json)["userNickname"].asString(), (*json)["userNo"].asInt64());
+		auto stmt2 = fmt::format("UPDATE [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblBriefUserInformation] SET [_userId] = N'{},{}', [_userNickname] = N'{}' WHERE [_userNo] = {}", (*json)["username"].asString(), (*json)["password"].asString(), utf8ToGBK((*json)["userNickname"].asString()), (*json)["userNo"].asInt64());
+
+		auto stmt3 = fmt::format("SELECT COUNT(_userNo) [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblUserInformation] WHERE [_userNo] = {}", (*json)["userNo"].asInt64());
 
 		Json::Value ret;
 
 		try
 		{
-			auto r1 = MsSql::exec(stmt1);
+			auto r3 = MsSql::exec(stmt1);
+			r3.next();
 
-			if (r1.affected_rows() == 1)
+			if (r3.rows() >= 0)
+			{
+				auto r1 = MsSql::exec(stmt1);
+
+				if (r1.affected_rows() == 1)
+				{
+					auto r2 = MsSql::exec(stmt2);
+
+					if (r2.affected_rows() == 1)
+					{
+						ret["msg"] = "ok";
+						ret["status"] = 1;
+					}
+					else
+					{
+						ret["msg"] = "user update error";
+						ret["status"] = 0;
+					}
+				}
+				else
+				{
+					ret["msg"] = "user update error";
+					ret["status"] = 0;
+				}
+			}
+			else
 			{
 				auto r2 = MsSql::exec(stmt2);
 
@@ -425,11 +497,6 @@ namespace api
 					ret["status"] = 0;
 				}
 			}
-			else
-			{
-				ret["msg"] = "user update error";
-				ret["status"] = 0;
-			}
 		}
 		catch (const std::exception& e)
 		{
@@ -442,6 +509,135 @@ namespace api
 	}
 
 	void User::characterUpdate(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const
+	{
+		std::shared_ptr<Json::Value> json = req->getJsonObject();
+		if (!json)
+		{
+			Json::Value ret;
+			ret["msg"] = "error";
+			ret["status"] = 0;
+			return callback(HttpResponse::newHttpJsonResponse(ret));
+		}
+
+		auto now = std::chrono::system_clock::now();
+		time_t time = std::chrono::system_clock::to_time_t(now);
+		auto timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(time));
+
+		auto stmt = fmt::format("UPDATE [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblCharacterInformation] SET [_characterName] = N'{}', [_currentPositionX] = {}, [_currentPositionY] = {}, [_currentPositionZ] = {}, [_returnPositionX] = {}, [_returnPositionY] = {}, [_returnPositionZ] = {} WHERE [_characterNo] = {}", utf8ToGBK((*json)["characterName"].asString()), (*json)["currentPositionX"].asInt64(), (*json)["currentPositionY"].asInt64(), (*json)["currentPositionZ"].asInt64(), (*json)["currentPositionX"].asInt64(), (*json)["currentPositionY"].asInt64(), (*json)["currentPositionZ"].asInt64(), (*json)["characterNo"].asInt64());
+
+		Json::Value ret;
+
+		try
+		{
+			auto r = MsSql::exec(stmt);
+
+			if (r.affected_rows() == 1)
+			{
+				if ((*json)["deletedDate"].asString() != "")
+				{
+					stmt = fmt::format("UPDATE [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblCharacterInformation] SET [_deletedDate] = '{}'", timestamp);
+					r = MsSql::exec(stmt);
+				}
+
+				ret["msg"] = "ok";
+				ret["status"] = 1;
+			}
+			else
+			{
+				ret["msg"] = "character update error";
+				ret["status"] = 0;
+			}
+		}
+		catch (const std::exception& e)
+		{
+			spdlog::warn("character update error: {}", e.what());
+			ret["msg"] = e.what();
+			ret["status"] = 0;
+		}
+
+		callback(HttpResponse::newHttpJsonResponse(ret));
+	}
+
+	void User::adminUpdate(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const
+	{
+		std::shared_ptr<Json::Value> json = req->getJsonObject();
+		if (!json)
+		{
+			Json::Value ret;
+			ret["msg"] = "error";
+			ret["status"] = 0;
+			return callback(HttpResponse::newHttpJsonResponse(ret));
+		}
+
+		auto now = std::chrono::system_clock::now();
+		time_t time = std::chrono::system_clock::to_time_t(now);
+		auto timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(time));
+
+		auto stmt1 = fmt::format("UPDATE [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblUserInformation] SET [_isValid] = '{}', [_userId] = N'{},{}', [_userNickname] = N'{}', [_isPcRoom] = {}, [_membershipType] = {} WHERE [_userNo] = {}", (*json)["isValid"].asInt64(), (*json)["username"].asString(), (*json)["password"].asString(), utf8ToGBK((*json)["userNickname"].asString()), (*json)["pcroom"].asInt64(), (*json)["membershipType"].asInt64(), (*json)["userNo"].asInt64());
+
+		auto stmt2 = fmt::format("UPDATE [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblBriefUserInformation] SET [_userId] = N'{},{}', [_userNickname] = N'{}' WHERE [_userNo] = {}", (*json)["username"].asString(), (*json)["password"].asString(), utf8ToGBK((*json)["userNickname"].asString()), (*json)["userNo"].asInt64());
+
+		auto stmt3 = fmt::format("SELECT COUNT(_userNo) [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblUserInformation] WHERE [_userNo] = {}", (*json)["userNo"].asInt64());
+
+		Json::Value ret;
+
+		try
+		{
+			auto r3 = MsSql::exec(stmt1);
+			r3.next();
+
+			if (r3.rows() >= 0)
+			{
+				auto r1 = MsSql::exec(stmt1);
+
+				if (r1.affected_rows() == 1)
+				{
+					auto r2 = MsSql::exec(stmt2);
+
+					if (r2.affected_rows() == 1)
+					{
+						ret["msg"] = "ok";
+						ret["status"] = 1;
+					}
+					else
+					{
+						ret["msg"] = "user update error";
+						ret["status"] = 0;
+					}
+				}
+				else
+				{
+					ret["msg"] = "user update error";
+					ret["status"] = 0;
+				}
+			}
+			else
+			{
+				auto r2 = MsSql::exec(stmt2);
+
+				if (r2.affected_rows() == 1)
+				{
+					ret["msg"] = "ok";
+					ret["status"] = 1;
+				}
+				else
+				{
+					ret["msg"] = "user update error";
+					ret["status"] = 0;
+				}
+			}
+		}
+		catch (const std::exception& e)
+		{
+			spdlog::warn("user update error: {}", e.what());
+			ret["msg"] = e.what();
+			ret["status"] = 0;
+		}
+
+		callback(HttpResponse::newHttpJsonResponse(ret));
+	}
+
+	void User::adminCharacterUpdate(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const
 	{
 		std::shared_ptr<Json::Value> json = req->getJsonObject();
 		if (!json)
@@ -491,7 +687,7 @@ namespace api
 		callback(HttpResponse::newHttpJsonResponse(ret));
 	}
 
-	void User::mail(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const
+	void User::adminMail(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const
 	{
 		std::shared_ptr<Json::Value> json = req->getJsonObject();
 		if (!json)
@@ -535,13 +731,13 @@ namespace api
 			}
 			else
 			{
-				ret["msg"] = "mail add error";
+				ret["msg"] = "admin mail add error";
 				ret["status"] = 0;
 			}
 		}
 		catch (const std::exception& e)
 		{
-			spdlog::warn("mail add error: {}", e.what());
+			spdlog::warn("admin mail add error: {}", e.what());
 			ret["msg"] = e.what();
 			ret["status"] = 0;
 		}
@@ -549,7 +745,7 @@ namespace api
 		callback(HttpResponse::newHttpJsonResponse(ret));
 	}
 
-	void User::adminCount(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, const std::string type) const
+	void User::adminGmCount(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, const std::string type) const
 	{
 		Json::Value ret;
 
@@ -586,7 +782,7 @@ namespace api
 		callback(HttpResponse::newHttpJsonResponse(ret));
 	}
 
-	void User::adminInfo(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, const std::string type) const
+	void User::adminGmInfo(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, const std::string type) const
 	{
 		Json::Value ret;
 
@@ -691,7 +887,7 @@ namespace api
 		callback(HttpResponse::newHttpJsonResponse(ret));
 	}
 
-	void User::adminUpdate(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, const std::string type) const
+	void User::adminGmUpdate(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, const std::string type) const
 	{
 		Json::Value ret;
 

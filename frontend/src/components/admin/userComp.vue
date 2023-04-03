@@ -962,7 +962,7 @@ const onSendMail = () => {
 
     useFetch()
       .post(
-        store.backend + '/api/user/mail',
+        store.backend + '/api/user/admin/mail',
         {
           senderName: dialog.value.mail.senderName,
           senderUserNo: parseInt(dialog.value.mail.senderUserNo),
@@ -980,12 +980,15 @@ const onSendMail = () => {
         $q.cookies.get('canplay_token')
       )
       .then((resp) => {
-        if (resp.data.status === 1) {
-          $q.notify('发送邮件成功');
-        }
-
         $q.loading.hide();
         clearTimeout(time);
+
+        if (resp.data.status === 0) {
+          $q.notify(resp.data.msg);
+          return;
+        }
+
+        $q.notify('发送邮件成功');
       })
       .catch(() => {
         $q.notify('网络错误，请稍后重试');
@@ -1005,7 +1008,7 @@ const onSave = () => {
 
   useFetch()
     .post(
-      store.backend + '/api/user/update',
+      store.backend + '/api/user/admin/update',
       {
         userNo: dialog.value.user.userNo,
         isValid: dialog.value.user.isValid,
@@ -1018,59 +1021,68 @@ const onSave = () => {
       $q.cookies.get('canplay_token')
     )
     .then((resp) => {
-      if (resp.data.status === 1) {
-        for (
-          let index = 0;
-          index < dialog.value.user.characters.rows.length;
-          index++
-        ) {
-          const element = dialog.value.user.characters.rows[index];
-
-          useFetch()
-            .post(
-              store.backend + '/api/user/character/update',
-              {
-                characterName: element.characterName,
-                currentPositionX: element.currentPositionX,
-                currentPositionY: element.currentPositionY,
-                currentPositionZ: element.currentPositionZ,
-                level: element.level,
-                experience: element.experience,
-                skillPointLevel: element.skillPointLevel,
-                skillPointExperience: element.skillPointExperience,
-                remainedSkillPoint: element.remainedSkillPoint,
-                aquiredSkillPoint: element.aquiredSkillPoint,
-                tendency: element.tendency,
-                variedWeight: element.variedWeight,
-                hp: element.hp,
-                mp: element.mp,
-                sp: element.sp,
-                wp: element.wp,
-                inventorySlotCount: element.inventorySlotCount,
-                titleKey: element.titleKey,
-                killRewardCount: element.killRewardCount,
-                enchantFailCount: element.enchantFailCount,
-                offenceValue: element.offenceValue,
-                defenceValue: element.defenceValue,
-                awakenValue: element.awakenValue,
-                characterNo: element.characterNo,
-                deletedDate: element.deletedDate === 1 ? '1' : '',
-              },
-              $q.cookies.get('canplay_token')
-            )
-            .then((resp) => {
-              if (resp.data.status === 1) {
-                $q.notify('更新账号成功');
-              }
-            })
-            .catch(() => {
-              $q.notify('网络错误，请稍后重试');
-            });
-        }
-      }
-
       $q.loading.hide();
       clearTimeout(time);
+
+      if (resp.data.status === 0) {
+        $q.notify(resp.data.msg);
+        return;
+      }
+
+      for (
+        let index = 0;
+        index < dialog.value.user.characters.rows.length;
+        index++
+      ) {
+        const element = dialog.value.user.characters.rows[index];
+
+        useFetch()
+          .post(
+            store.backend + '/api/user/admin/character/update',
+            {
+              characterName: element.characterName,
+              currentPositionX: element.currentPositionX,
+              currentPositionY: element.currentPositionY,
+              currentPositionZ: element.currentPositionZ,
+              level: element.level,
+              experience: element.experience,
+              skillPointLevel: element.skillPointLevel,
+              skillPointExperience: element.skillPointExperience,
+              remainedSkillPoint: element.remainedSkillPoint,
+              aquiredSkillPoint: element.aquiredSkillPoint,
+              tendency: element.tendency,
+              variedWeight: element.variedWeight,
+              hp: element.hp,
+              mp: element.mp,
+              sp: element.sp,
+              wp: element.wp,
+              inventorySlotCount: element.inventorySlotCount,
+              titleKey: element.titleKey,
+              killRewardCount: element.killRewardCount,
+              enchantFailCount: element.enchantFailCount,
+              offenceValue: element.offenceValue,
+              defenceValue: element.defenceValue,
+              awakenValue: element.awakenValue,
+              characterNo: element.characterNo,
+              deletedDate: element.deletedDate === 1 ? '1' : '',
+            },
+            $q.cookies.get('canplay_token')
+          )
+          .then((resp) => {
+            $q.loading.hide();
+            clearTimeout(time);
+
+            if (resp.data.status === 0) {
+              $q.notify(resp.data.msg);
+              return;
+            }
+
+            $q.notify('更新账号成功');
+          })
+          .catch(() => {
+            $q.notify('网络错误，请稍后重试');
+          });
+      }
     })
     .catch(() => {
       $q.notify('网络错误，请稍后重试');
@@ -1094,7 +1106,7 @@ const onGmRequest = (props: any) => {
 
   useFetch()
     .post(
-      store.backend + '/api/user/admin/info/web',
+      store.backend + '/api/user/admin/gm/info/web',
       {
         curPage: (page - 1) * rowsPerPage,
         maxPage: rowsPerPage === 0 ? rowsNumber : rowsPerPage,
@@ -1148,7 +1160,7 @@ const onGmQuery = () => {
 
   useFetch()
     .get(
-      store.backend + '/api/user/admin/count/web',
+      store.backend + '/api/user/admin/gm/count/web',
       $q.cookies.get('canplay_token')
     )
     .then((resp) => {
@@ -1175,7 +1187,7 @@ const onGmSave = () => {
 
   useFetch()
     .put(
-      store.backend + '/api/user/admin/update/web',
+      store.backend + '/api/user/admin/gm/update/web',
       {
         userNo: parseInt(dialog.value.gm.id),
         permission: dialog.value.gm.level.model.value,
@@ -1222,7 +1234,7 @@ const onGmDel = (val: any) => {
 
     useFetch()
       .post(
-        store.backend + '/api/user/admin/update/web',
+        store.backend + '/api/user/admin/gm/update/web',
         {
           id: element.id,
         },
