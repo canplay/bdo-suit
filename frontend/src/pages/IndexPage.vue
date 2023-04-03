@@ -1,6 +1,6 @@
 <template>
   <q-page padding>
-    <q-scroll-area style="height: calc(100vh - 56px - 50px - 58px)">
+    <q-scroll-area style="height: calc(100vh - 56px - 50px - 32px)">
       <div class="row" id="index">
         <q-carousel
           dark
@@ -491,7 +491,7 @@ const $q = useQuasar();
 const store = useStore();
 
 const slide = ref({
-  model: '1',
+  model: '测试滚动图1',
   list: [] as any,
 });
 const news = ref([] as any);
