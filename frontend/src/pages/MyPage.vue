@@ -11,9 +11,12 @@
 
         <q-card-section>
           <div class="row">
-            <div class="col text-h6">角色名: {{ item.characterName }}</div>
+            <div class="col text-h6 text-bold">
+              角色名: {{ item.characterName }}
+            </div>
+
             <q-btn
-              class="col"
+              class="col-3"
               color="primary"
               label="自助修改"
               @click="onDialog(item)"
@@ -21,10 +24,8 @@
           </div>
 
           <div class="row">
-            <div class="col text-caption">等级: {{ item.level }}</div>
-            <div class="col text-caption">
-              游玩时长: {{ item.totalPlayTime }}
-            </div>
+            <div class="col text-body1">等级: {{ item.level }}</div>
+            <div class="col text-body1">游玩时长: {{ item.totalPlayTime }}</div>
           </div>
         </q-card-section>
 
@@ -67,10 +68,10 @@
     <div style="height: 8px" />
 
     <q-card>
-      <q-card-section class="text-h6">自助修改</q-card-section>
+      <q-card-section class="text-h6 text-bold">自助修改</q-card-section>
 
       <q-card-section>
-        <q-form @submit="onUpdateInfo">
+        <q-form @submit="onUpdateInfo('user')">
           <div class="row">
             <q-input class="col" v-model="account.username" label="用户名" />
 
@@ -84,7 +85,27 @@
 
             <div class="col-auto" style="width: 8px" />
 
-            <q-btn class="col" color="primary" label="修改" type="submit" />
+            <q-btn class="col-2" color="primary" label="修改" type="submit" />
+          </div>
+
+          <div class="col-auto" style="height: 8px" />
+
+          <div class="row">
+            <q-btn
+              class="col-2"
+              color="primary"
+              label="解锁地图"
+              @click="onUpdateInfo('map')"
+            />
+
+            <div class="col-auto" style="width: 8px" />
+
+            <q-btn
+              class="col-2"
+              color="primary"
+              label="解锁知识"
+              @click="onUpdateInfo('knowledge')"
+            />
           </div>
         </q-form>
       </q-card-section>
@@ -93,7 +114,7 @@
     <div style="height: 8px" />
 
     <q-card>
-      <q-card-section class="text-h6">自助邮件</q-card-section>
+      <q-card-section class="text-h6 text-bold">自助邮件</q-card-section>
 
       <q-card-section>
         <q-form @submit="onSendMail">
@@ -118,7 +139,16 @@
 
             <div class="col-auto" style="width: 8px" />
 
-            <q-btn class="col" color="primary" label="发送" type="submit" />
+            <q-btn
+              class="col-2"
+              color="negative"
+              label="清理"
+              @click="onClearMail"
+            />
+
+            <div class="col-auto" style="width: 8px" />
+
+            <q-btn class="col-2" color="primary" label="发送" type="submit" />
           </div>
         </q-form>
       </q-card-section>
@@ -185,7 +215,7 @@ const dialog = ref({
   z: '',
 });
 
-const onUpdateInfo = () => {
+const onUpdateInfo = (type: string) => {
   let time = setTimeout(() => {
     $q.loading.hide();
     clearTimeout(time);
@@ -193,37 +223,92 @@ const onUpdateInfo = () => {
 
   $q.loading.show();
 
-  useFetch()
-    .post(
-      store.backend + '/api/user/update',
-      {
-        userNo: store.user.userno,
-        username: account.value.username,
-        password: account.value.password,
-        userNickname: account.value.familyName,
-        isValid: 1,
-        pcroom: 1,
-        membershipType: 0,
-      },
-      $q.cookies.get('canplay_token')
-    )
-    .then((resp) => {
-      $q.loading.hide();
-      clearTimeout(time);
+  switch (type) {
+    case 'map':
+      useFetch()
+        .post(
+          store.backend + '/api/user/update/map',
+          {
+            userNo: store.user.userno,
+          },
+          $q.cookies.get('canplay_token')
+        )
+        .then((resp) => {
+          $q.loading.hide();
+          clearTimeout(time);
 
-      if (resp.data.status === 0) {
-        $q.notify(resp.data.msg);
-        return;
-      }
+          if (resp.data.status === 0) {
+            $q.notify(resp.data.msg);
+            return;
+          }
 
-      refrashUserInfo();
-      $q.notify('修改成功');
-    })
-    .catch(() => {
-      $q.notify('网络错误，请稍后重试');
-      $q.loading.hide();
-      clearTimeout(time);
-    });
+          $q.notify('解锁成功');
+        })
+        .catch(() => {
+          $q.notify('网络错误，请稍后重试');
+          $q.loading.hide();
+          clearTimeout(time);
+        });
+      break;
+
+    case 'knowledge':
+      useFetch()
+        .post(
+          store.backend + '/api/user/update/knowledge',
+          {
+            userNo: store.user.userno,
+          },
+          $q.cookies.get('canplay_token')
+        )
+        .then((resp) => {
+          $q.loading.hide();
+          clearTimeout(time);
+
+          if (resp.data.status === 0) {
+            $q.notify(resp.data.msg);
+            return;
+          }
+
+          $q.notify('解锁成功');
+        })
+        .catch(() => {
+          $q.notify('网络错误，请稍后重试');
+          $q.loading.hide();
+          clearTimeout(time);
+        });
+      break;
+
+    default:
+      useFetch()
+        .post(
+          store.backend + '/api/user/update/user',
+          {
+            userNo: store.user.userno,
+            username: account.value.username,
+            password: account.value.password,
+            userNickname: account.value.familyName,
+          },
+          $q.cookies.get('canplay_token')
+        )
+        .then((resp) => {
+          $q.loading.hide();
+          clearTimeout(time);
+
+          if (resp.data.status === 0) {
+            $q.notify(resp.data.msg);
+            return;
+          }
+
+          refrashUserInfo();
+          $q.notify('修改成功');
+        })
+        .catch(() => {
+          $q.notify('网络错误，请稍后重试');
+          $q.loading.hide();
+          clearTimeout(time);
+        });
+      break;
+  }
 };
 
 const onSendMail = () => {
@@ -236,7 +321,7 @@ const onSendMail = () => {
 
   useFetch()
     .post(
-      store.backend + '/api/user/mail',
+      store.backend + '/api/user/mail/send',
       {
         receiverName: store.user.username,
         receiverUserNo: store.user.userno,
@@ -251,11 +336,49 @@ const onSendMail = () => {
       clearTimeout(time);
 
       if (resp.data.status === 0) {
+        if (resp.data.msg === 'no mail') {
+          $q.notify('邮箱是空的');
+          return;
+        }
         $q.notify(resp.data.msg);
         return;
       }
 
       $q.notify('发送邮件成功');
+    })
+    .catch(() => {
+      $q.notify('网络错误，请稍后重试');
+      $q.loading.hide();
+      clearTimeout(time);
+    });
+};
+
+const onClearMail = () => {
+  let time = setTimeout(() => {
+    $q.loading.hide();
+    clearTimeout(time);
+  }, 120000);
+
+  $q.loading.show();
+
+  useFetch()
+    .post(
+      store.backend + '/api/user/mail/clear',
+      {
+        receiverUserNo: store.user.userno,
+      },
+      $q.cookies.get('canplay_token')
+    )
+    .then((resp) => {
+      $q.loading.hide();
+      clearTimeout(time);
+
+      if (resp.data.status === 0) {
+        $q.notify(resp.data.msg);
+        return;
+      }
+
+      $q.notify('清理邮件成功');
     })
     .catch(() => {
       $q.notify('网络错误，请稍后重试');
@@ -324,8 +447,6 @@ const refrashUserInfo = () => {
         $q.notify(resp.data.msg);
         return;
       }
-
-      let username = resp.data.msg.userId.split(',');
 
       store.user = {
         userno: resp.data.msg.userNo,

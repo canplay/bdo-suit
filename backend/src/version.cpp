@@ -79,7 +79,7 @@ namespace api
 
 				auto r = MsSql::exec(stmt);
 
-				if (r.affected_rows() == 1)
+				if (r.affected_rows() >= 1)
 				{
 					if (hdiff_r.find("patch check diff data ok") != std::string::npos)
 					{
@@ -140,7 +140,7 @@ namespace api
 		{
 			auto r = MsSql::exec(stmt);
 
-			if (r.affected_rows() == 1)
+			if (r.affected_rows() >= 1)
 			{
 				ret["msg"] = "ok";
 				ret["status"] = 1;

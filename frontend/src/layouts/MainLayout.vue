@@ -121,6 +121,10 @@ onMounted(() => {
       )
       .then((resp) => {
         if (resp.data.status === 0) {
+          if (resp.data.msg === 'jwt token is invalid') {
+            $q.notify('登录超时, 请重新登录');
+            return;
+          }
           $q.notify(resp.data.msg);
           return;
         }

@@ -53,7 +53,7 @@ namespace api
 		{
 			auto r = MsSql::exec(stmt);
 
-			if (r.affected_rows() == 1)
+			if (r.affected_rows() >= 1)
 			{
 				ret["msg"] = "ok";
 				ret["status"] = 1;
@@ -99,7 +99,7 @@ namespace api
 		{
 			auto r = MsSql::exec(stmt);
 
-			if (r.affected_rows() == 1)
+			if (r.affected_rows() >= 1)
 			{
 				ret["msg"] = "ok";
 				ret["status"] = 1;

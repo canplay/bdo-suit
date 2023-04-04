@@ -16,9 +16,9 @@ namespace api
 		METHOD_ADD(User::signout, "/signout", Options, Post, "api::JwtFilter");
 		METHOD_ADD(User::info, "/info", Options, Post, "api::JwtFilter");
 		METHOD_ADD(User::infoOne, "/info/{id}", Options, Get, "api::JwtFilter");
-		METHOD_ADD(User::update, "/update", Options, Post, "api::JwtFilter");
+		METHOD_ADD(User::update, "/update/{type}", Options, Post, "api::JwtFilter");
 		METHOD_ADD(User::characterUpdate, "/character/update", Options, Post, "api::JwtFilter");
-		METHOD_ADD(User::mail, "/mail", Options, Post, "api::JwtFilter");
+		METHOD_ADD(User::mail, "/mail/{type}", Options, Post, "api::JwtFilter");
 		METHOD_ADD(User::adminUpdate, "/admin/update", Options, Post, "api::JwtFilter");
 		METHOD_ADD(User::adminCharacterUpdate, "/admin/character/update", Options, Post, "api::JwtFilter");
 		METHOD_ADD(User::adminMail, "/admin/mail", Options, Post, "api::JwtFilter");
@@ -43,9 +43,9 @@ namespace api
 
 		void infoOne(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, const std::string& id) const;
 
-		void mail(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const;
+		void mail(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, const std::string type) const;
 
-		void update(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const;
+		void update(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, const std::string type) const;
 
 		void characterUpdate(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const;
 

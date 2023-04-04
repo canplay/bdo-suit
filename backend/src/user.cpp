@@ -72,7 +72,7 @@ namespace api
 
 				auto r1 = MsSql::exec(stmt1);
 
-				if (r1.affected_rows() == 1)
+				if (r1.affected_rows() >= 1)
 				{
 					auto stmt2 = fmt::format("SELECT * FROM [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblUserInformation] WHERE _userId = '{},{}'", (*json)["username"].asString(), (*json)["password"].asString());
 					auto r2 = MsSql::exec(stmt2);
@@ -155,6 +155,10 @@ namespace api
 
 			if (r.rows() != 0)
 			{
+				Json::Value info;
+
+				auto r = MsSql::exec(stmt);
+				r.next();
 				info["registerDate"] = r.get<std::string>("_registerDate", "");
 				info["valid"] = r.get<std::string>("_isValid", "");
 				info["userNo"] = r.get<INT64>("_userNo", 0);
@@ -166,6 +170,46 @@ namespace api
 				info["membershipType"] = r.get<INT64>("_membershipType", 0);
 				info["pcroom"] = r.get<INT64>("_isPcRoom", 0);
 				info["permission"] = getPermission(std::to_string(r.get<INT64>("_userNo", 0)));
+
+				Json::Value characters;
+				auto stmt1 = fmt::format("SELECT * FROM [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblCharacterInformation] WHERE [_userNo] = {}", r.get<INT64>("_userNo", 0));
+				auto r1 = MsSql::exec(stmt1);
+				while (r1.next())
+				{
+					Json::Value character;
+					character["deletedDate"] = r1.get<std::string>("_deletedDate", "");
+					character["characterNo"] = r1.get<INT64>("_characterNo", 0);
+					character["characterName"] = r1.get<std::string>("_characterName", "");
+					character["classType"] = r1.get<INT64>("_classType", 0);
+					character["totalPlayTime"] = r1.get<INT64>("_totalPlayTime", 0);
+					character["currentPositionX"] = r1.get<INT64>("_currentPositionX", 0);
+					character["currentPositionY"] = r1.get<INT64>("_currentPositionY", 0);
+					character["currentPositionZ"] = r1.get<INT64>("_currentPositionZ", 0);
+					character["returnPositionX"] = r1.get<INT64>("_returnPositionX", 0);
+					character["returnPositionY"] = r1.get<INT64>("_returnPositionY", 0);
+					character["returnPositionZ"] = r1.get<INT64>("_returnPositionZ", 0);
+					character["level"] = r1.get<INT64>("_level", 0);
+					character["experience"] = r1.get<INT64>("_experience", 0);
+					character["variedWeight"] = r1.get<INT64>("_variedWeight", 0);
+					character["skillPointLevel"] = r1.get<INT64>("_skillPointLevel", 0);
+					character["skillPointExperience"] = r1.get<INT64>("_skillPointExperience", 0);
+					character["remainedSkillPoint"] = r1.get<INT64>("_remainedSkillPoint", 0);
+					character["aquiredSkillPoint"] = r1.get<INT64>("_aquiredSkillPoint", 0);
+					character["tendency"] = r1.get<INT64>("_tendency", 0);
+					character["hp"] = r1.get<INT64>("_hp", 0);
+					character["mp"] = r1.get<INT64>("_mp", 0);
+					character["sp"] = r1.get<INT64>("_sp", 0);
+					character["wp"] = r1.get<INT64>("_wp", 0);
+					character["inventorySlotCount"] = r1.get<INT64>("_inventorySlotCount", 0);
+					character["titleKey"] = r1.get<INT64>("_titleKey", 0);
+					character["killRewardCount"] = r1.get<INT64>("_killRewardCount", 0);
+					character["enchantFailCount"] = r1.get<INT64>("_enchantFailCount", 0);
+					character["offenceValue"] = r1.get<INT64>("_offenceValue", 0);
+					character["defenceValue"] = r1.get<INT64>("_defenceValue", 0);
+					character["awakenValue"] = r1.get<INT64>("_awakenValue", 0);
+					characters.append(character);
+				}
+				info["characters"] = characters;
 
 				jwt jwtGenerated = jwt::generateToken(
 					{
@@ -192,7 +236,7 @@ namespace api
 		}
 		catch (const std::exception& e)
 		{
-			spdlog::warn("signup error: {}", e.what());
+			spdlog::warn("signin error: {}", e.what());
 			ret["msg"] = e.what();
 			ret["status"] = 0;
 		}
@@ -385,7 +429,7 @@ namespace api
 		callback(HttpResponse::newHttpJsonResponse(ret));
 	}
 
-	void User::mail(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const
+	void User::mail(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, const std::string type) const
 	{
 		std::shared_ptr<Json::Value> json = req->getJsonObject();
 		if (!json)
@@ -400,28 +444,43 @@ namespace api
 		time_t time = std::chrono::system_clock::to_time_t(now);
 		auto timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(time));
 
-		auto stmt = fmt::format("INSERT INTO [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblMail] ([_registerDate], [_senderName], [_senderUserNo], [_receiverName], [_receiverUserNo], [_title], [_contents], [_mailType], [_variousNo], [_enchantLevel], [_itemCount], [_webItemType], [_chargeNo]) VALUES ('{}', N'自助邮件', 0, N'{}', {}, N'自助邮件', N'自助邮件', 0, {}, {}, {}, 0, '')", timestamp, (*json)["receiverName"].asString(), (*json)["receiverUserNo"].asInt64(), (*json)["variousNo"].asInt64(), (*json)["enchantLevel"].asInt64(), (*json)["itemCount"].asInt64());
-
 		Json::Value ret;
+		std::string stmt = "";
+
+		if (type == "send")
+		{
+			stmt = fmt::format("INSERT INTO [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblMail] ([_registerDate], [_senderName], [_senderUserNo], [_receiverName], [_receiverUserNo], [_title], [_contents], [_mailType], [_variousNo], [_enchantLevel], [_itemCount], [_webItemType], [_chargeNo]) VALUES ('{}', N'自助邮件', 0, N'{}', {}, N'自助邮件', N'自助邮件', 0, {}, {}, {}, 0, '')", timestamp, utf8ToGBK((*json)["receiverName"].asString()), (*json)["receiverUserNo"].asInt64(), (*json)["variousNo"].asInt64(), (*json)["enchantLevel"].asInt64(), (*json)["itemCount"].asInt64());
+		}
+		else if (type == "clear")
+		{
+			stmt = fmt::format("DELETE FROM [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblMail] WHERE [_senderName] = N'自助邮件' AND [_receiverUserNo] = {}", (*json)["receiverUserNo"].asInt64());
+		}
+		else
+		{
+			ret["msg"] = "no method";
+			ret["status"] = 0;
+
+			return callback(HttpResponse::newHttpJsonResponse(ret));
+		}
 
 		try
 		{
 			auto r = MsSql::exec(stmt);
 
-			if (r.affected_rows() == 1)
+			if (r.affected_rows() >= 1)
 			{
 				ret["msg"] = "ok";
 				ret["status"] = 1;
 			}
 			else
 			{
-				ret["msg"] = "mail add error";
+				ret["msg"] = "no mail";
 				ret["status"] = 0;
 			}
 		}
 		catch (const std::exception& e)
 		{
-			spdlog::warn("mail add error: {}", e.what());
+			spdlog::warn("mail error: {}", e.what());
 			ret["msg"] = e.what();
 			ret["status"] = 0;
 		}
@@ -429,7 +488,7 @@ namespace api
 		callback(HttpResponse::newHttpJsonResponse(ret));
 	}
 
-	void User::update(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const
+	void User::update(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, const std::string type) const
 	{
 		std::shared_ptr<Json::Value> json = req->getJsonObject();
 		if (!json)
@@ -444,28 +503,51 @@ namespace api
 		time_t time = std::chrono::system_clock::to_time_t(now);
 		auto timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(time));
 
-		auto stmt1 = fmt::format("UPDATE [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblUserInformation] SET [_userId] = N'{},{}', [_userNickname] = N'{}' WHERE [_userNo] = {}", (*json)["username"].asString(), (*json)["password"].asString(), utf8ToGBK((*json)["userNickname"].asString()), (*json)["userNo"].asInt64());
-
-		auto stmt2 = fmt::format("UPDATE [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblBriefUserInformation] SET [_userId] = N'{},{}', [_userNickname] = N'{}' WHERE [_userNo] = {}", (*json)["username"].asString(), (*json)["password"].asString(), utf8ToGBK((*json)["userNickname"].asString()), (*json)["userNo"].asInt64());
-
-		auto stmt3 = fmt::format("SELECT COUNT(_userNo) [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblUserInformation] WHERE [_userNo] = {}", (*json)["userNo"].asInt64());
-
 		Json::Value ret;
 
-		try
+		if (type == "user")
 		{
-			auto r3 = MsSql::exec(stmt1);
-			r3.next();
+			auto stmt1 = fmt::format("UPDATE [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblUserInformation] SET [_userId] = N'{},{}', [_userNickname] = N'{}' WHERE [_userNo] = {}", (*json)["username"].asString(), (*json)["password"].asString(), utf8ToGBK((*json)["userNickname"].asString()), (*json)["userNo"].asInt64());
 
-			if (r3.rows() >= 0)
+			auto stmt2 = fmt::format("UPDATE [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblBriefUserInformation] SET [_userId] = N'{},{}', [_userNickname] = N'{}' WHERE [_userNo] = {}", (*json)["username"].asString(), (*json)["password"].asString(), utf8ToGBK((*json)["userNickname"].asString()), (*json)["userNo"].asInt64());
+
+			auto stmt3 = fmt::format("SELECT COUNT(_userNo) [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblBriefUserInformation] WHERE [_userNo] = {}", (*json)["userNo"].asInt64());
+
+			try
 			{
-				auto r1 = MsSql::exec(stmt1);
+				auto r3 = MsSql::exec(stmt1);
+				r3.next();
 
-				if (r1.affected_rows() == 1)
+				if (r3.rows() > 0)
 				{
-					auto r2 = MsSql::exec(stmt2);
+					auto r1 = MsSql::exec(stmt1);
 
-					if (r2.affected_rows() == 1)
+					if (r1.affected_rows() >= 1)
+					{
+						auto r2 = MsSql::exec(stmt2);
+
+						if (r2.affected_rows() >= 1)
+						{
+							ret["msg"] = "ok";
+							ret["status"] = 1;
+						}
+						else
+						{
+							ret["msg"] = "user update error";
+							ret["status"] = 0;
+						}
+					}
+					else
+					{
+						ret["msg"] = "user update error";
+						ret["status"] = 0;
+					}
+				}
+				else
+				{
+					auto r1 = MsSql::exec(stmt1);
+
+					if (r1.affected_rows() >= 1)
 					{
 						ret["msg"] = "ok";
 						ret["status"] = 1;
@@ -476,32 +558,55 @@ namespace api
 						ret["status"] = 0;
 					}
 				}
-				else
-				{
-					ret["msg"] = "user update error";
-					ret["status"] = 0;
-				}
 			}
-			else
+			catch (const std::exception& e)
 			{
-				auto r2 = MsSql::exec(stmt2);
-
-				if (r2.affected_rows() == 1)
-				{
-					ret["msg"] = "ok";
-					ret["status"] = 1;
-				}
-				else
-				{
-					ret["msg"] = "user update error";
-					ret["status"] = 0;
-				}
+				spdlog::warn("user update error: {}", e.what());
+				ret["msg"] = e.what();
+				ret["status"] = 0;
 			}
 		}
-		catch (const std::exception& e)
+		else if (type == "map")
 		{
-			spdlog::warn("user update error: {}", e.what());
-			ret["msg"] = e.what();
+			async_run([=]()->Task<void>
+			{
+				for (size_t i = 1; i < 2001; ++i)
+				{
+					Json::Value info;
+
+					auto stmt = fmt::format("IF NOT EXISTS (SELECT * FROM [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblPlantRepository] WHERE [_userNo] = {} AND [_waypointKey] = {}) INSERT INTO [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblPlantRepository] ([_registerDate], [_userNo], [_waypointKey], [_type], [_subType], [_value], [_experience], [_dateTime]) VALUES ('{}', {}, {}, 0, 0, 1, 0, '{}') ELSE UPDATE [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblPlantRepository] SET [_value] = 1 WHERE [_userNo] = {} AND [_waypointKey] = {}", (*json)["userNo"].asInt64(), i, timestamp, (*json)["userNo"].asInt64(), i, timestamp, (*json)["userNo"].asInt64(), i);
+
+					MsSql::exec(stmt);
+				}
+
+				co_return;
+			});
+
+			ret["msg"] = "ok";
+			ret["status"] = 1;
+		}
+		else if (type == "knowledge")
+		{
+			async_run([=]()->Task<void>
+			{
+				for (size_t i = 1; i < 10853; ++i)
+				{
+					Json::Value info;
+
+					auto stmt = fmt::format("IF NOT EXISTS (SELECT * FROM [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblMentalCardList] WHERE [_userNo] = {} AND [_cardKey] = {}) INSERT INTO [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblMentalCardList] ([_registerDate], [_userNo], [_cardKey], [_level]) VALUES ('{}', {}, {}, 1) ELSE UPDATE [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblMentalCardList] SET [_level] = 1 WHERE [_userNo] = {} AND [_cardKey] = {}", (*json)["userNo"].asInt64(), i, timestamp, (*json)["userNo"].asInt64(), i, (*json)["userNo"].asInt64(), i);
+
+					MsSql::exec(stmt);
+				}
+
+				co_return;
+			});
+
+			ret["msg"] = "ok";
+			ret["status"] = 1;
+		}
+		else
+		{
+			ret["msg"] = "no method";
 			ret["status"] = 0;
 		}
 
@@ -531,7 +636,7 @@ namespace api
 		{
 			auto r = MsSql::exec(stmt);
 
-			if (r.affected_rows() == 1)
+			if (r.affected_rows() >= 1)
 			{
 				if ((*json)["deletedDate"].asString() != "")
 				{
@@ -586,15 +691,15 @@ namespace api
 			auto r3 = MsSql::exec(stmt1);
 			r3.next();
 
-			if (r3.rows() >= 0)
+			if (r3.rows() > 0)
 			{
 				auto r1 = MsSql::exec(stmt1);
 
-				if (r1.affected_rows() == 1)
+				if (r1.affected_rows() >= 1)
 				{
 					auto r2 = MsSql::exec(stmt2);
 
-					if (r2.affected_rows() == 1)
+					if (r2.affected_rows() >= 1)
 					{
 						ret["msg"] = "ok";
 						ret["status"] = 1;
@@ -615,7 +720,7 @@ namespace api
 			{
 				auto r2 = MsSql::exec(stmt2);
 
-				if (r2.affected_rows() == 1)
+				if (r2.affected_rows() >= 1)
 				{
 					ret["msg"] = "ok";
 					ret["status"] = 1;
@@ -660,7 +765,7 @@ namespace api
 		{
 			auto r = MsSql::exec(stmt);
 
-			if (r.affected_rows() == 1)
+			if (r.affected_rows() >= 1)
 			{
 				if (!(*json)["deletedDate"].asString().empty())
 				{
@@ -724,7 +829,7 @@ namespace api
 		{
 			auto r = MsSql::exec(stmt);
 
-			if (r.affected_rows() == 1)
+			if (r.affected_rows() >= 1)
 			{
 				ret["msg"] = "ok";
 				ret["status"] = 1;
@@ -919,7 +1024,7 @@ namespace api
 				{
 					auto r = MsSql::exec(stmt);
 
-					if (r.affected_rows() == 1)
+					if (r.affected_rows() >= 1)
 					{
 						ret["msg"] = "ok";
 						ret["status"] = 1;
@@ -949,7 +1054,7 @@ namespace api
 				{
 					auto r = MsSql::exec(stmt);
 
-					if (r.affected_rows() == 1)
+					if (r.affected_rows() >= 1)
 					{
 						ret["msg"] = "ok";
 						ret["status"] = 1;
@@ -999,7 +1104,7 @@ namespace api
 		{
 			auto r = MsSql::exec(stmt);
 
-			if (r.affected_rows() == 1)
+			if (r.affected_rows() >= 1)
 			{
 				ret["msg"] = "ok";
 				ret["status"] = 1;
@@ -1043,7 +1148,7 @@ namespace api
 		{
 			auto r = MsSql::exec(stmt);
 
-			if (r.affected_rows() == 1)
+			if (r.affected_rows() >= 1)
 			{
 				ret["msg"] = "ok";
 				ret["status"] = 1;
@@ -1087,7 +1192,7 @@ namespace api
 		{
 			auto r = MsSql::exec(stmt);
 
-			if (r.affected_rows() == 1)
+			if (r.affected_rows() >= 1)
 			{
 				ret["msg"] = "ok";
 				ret["status"] = 1;

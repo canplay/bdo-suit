@@ -348,6 +348,8 @@
               square
               class="bg-white col"
               icon="img:imgs/weibo.svg"
+              :href="link.weibo"
+              target="_blank"
             />
             <q-btn
               dark
@@ -355,6 +357,8 @@
               square
               class="bg-white col"
               icon="img:imgs/qq.svg"
+              :href="link.qq"
+              target="_blank"
             />
             <q-btn
               dark
@@ -362,6 +366,8 @@
               square
               class="bg-white col"
               icon="img:imgs/wechat.svg"
+              :href="link.wechat"
+              target="_blank"
             />
             <q-btn
               dark
@@ -369,6 +375,8 @@
               square
               class="bg-white col"
               icon="img:imgs/github.svg"
+              :href="link.github"
+              target="_blank"
             />
             <q-btn
               dark
@@ -376,8 +384,18 @@
               square
               class="bg-white col"
               icon="img:imgs/telegram.svg"
+              :href="link.telegram"
+              target="_blank"
             />
-            <q-btn dark flat class="bg-white col" icon="img:imgs/discord.svg" />
+            <q-btn
+              dark
+              flat
+              square
+              class="bg-white col"
+              icon="img:imgs/discord.svg"
+              :href="link.discord"
+              target="_blank"
+            />
           </div>
         </q-card-section>
       </q-card>
@@ -680,7 +698,7 @@ const onSignin = () => {
         cash: 0,
         pearl: 0,
         permission: resp.data.msg.permission,
-        characters: [],
+        characters: resp.data.msg.characters,
       };
 
       $q.loading.hide();
