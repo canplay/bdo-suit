@@ -6,6 +6,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:logger/logger.dart';
 import 'package:process_run/shell.dart';
@@ -167,6 +168,14 @@ class _MyHomePageState extends State<MyHomePage>
     await update();
     await getSlide();
     await getNews();
+
+    var shell = Shell(
+      throwOnError: false,
+      workingDirectory: exePath,
+    );
+    await shell.run('patch -u');
+
+    exit(0);
   }
 
   Future<void> getSlide() async {
@@ -307,59 +316,12 @@ class _MyHomePageState extends State<MyHomePage>
   void runGame() async {
     EasyLoading.show(status: "正在启动游戏...");
 
-    // final r = ShellExecute(
-    //   0,
-    //   "open".toNativeUtf16(),
-    //   '${clientPathController.text}\\bin64\\BlackDesert64.exe'.toNativeUtf16(),
-    //   "${usernameController.text},${passwordController.text}".toNativeUtf16(),
-    //   clientPathController.text.toNativeUtf16(),
-    //   SW_SHOW,
-    // );
-
-    // switch (r) {
-    //   case 0:
-    //     SmartDialog.dismiss();
-    //     SmartDialog.showToast("启动游戏失败, 内存不足");
-    //     break;
-    //   case 2:
-    //     SmartDialog.dismiss();
-    //     SmartDialog.showToast("启动游戏失败, 文件名错误");
-    //     break;
-    //   case 3:
-    //     SmartDialog.dismiss();
-    //     SmartDialog.showToast("启动游戏失败, 文件夹路径错误");
-    //     break;
-    //   case 11:
-    //     SmartDialog.dismiss();
-    //     SmartDialog.showToast("启动游戏失败, 执行文件无效");
-    //     break;
-    //   case 26:
-    //     SmartDialog.dismiss();
-    //     SmartDialog.showToast("启动游戏失败, 共享错误");
-    //     break;
-    //   case 27:
-    //     SmartDialog.dismiss();
-    //     SmartDialog.showToast("启动游戏失败, 文件名不完全或无效");
-    //     break;
-    //   case 28:
-    //     SmartDialog.dismiss();
-    //     SmartDialog.showToast("启动游戏失败, 超时");
-    //     break;
-    //   case 31:
-    //     SmartDialog.dismiss();
-    //     SmartDialog.showToast("启动游戏失败, 没有关联的启动程序");
-    //     break;
-    //   default:
-    //     SmartDialog.dismiss();
-    //     SmartDialog.showToast("正在启动游戏, 请稍后...");
-    // }
-
     var shell = Shell(
       throwOnError: false,
       workingDirectory: '${clientPathController.text}\\bin64',
     );
     final r = await shell.run(
-        'start BlackDesert64.exe ${usernameController.text},${passwordController.text}');
+        'BlackDesert64.exe ${usernameController.text},${passwordController.text}');
 
     if (r.last.exitCode <= 0) {
       EasyLoading.dismiss();
@@ -519,8 +481,11 @@ class _MyHomePageState extends State<MyHomePage>
     var result = false;
 
     var controller = ShellLinesController();
-    var shell =
-        Shell(throwOnError: false, stdout: controller.sink, verbose: false);
+    var shell = Shell(
+      throwOnError: false,
+      stdout: controller.sink,
+      verbose: false,
+    );
 
     controller.stream.listen((event) {
       if (event.characters.string.contains('hpatchz dir patch time:')) {
