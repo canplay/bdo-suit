@@ -168,14 +168,6 @@ class _MyHomePageState extends State<MyHomePage>
     await update();
     await getSlide();
     await getNews();
-
-    var shell = Shell(
-      throwOnError: false,
-      workingDirectory: exePath,
-    );
-    await shell.run('patch -u');
-
-    exit(0);
   }
 
   Future<void> getSlide() async {
@@ -321,7 +313,7 @@ class _MyHomePageState extends State<MyHomePage>
       workingDirectory: '${clientPathController.text}\\bin64',
     );
     final r = await shell.run(
-        'BlackDesert64.exe ${usernameController.text},${passwordController.text}');
+        'start BlackDesert64.exe ${usernameController.text},${passwordController.text}');
 
     if (r.last.exitCode <= 0) {
       EasyLoading.dismiss();
