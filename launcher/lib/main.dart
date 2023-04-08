@@ -6,9 +6,9 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:logger/logger.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:process_run/shell.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:version/version.dart';
@@ -72,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage>
   var autoLogin = false;
   var logined = false;
   Map<String, dynamic> version = {
-    'app': '2023.4.002',
+    'app': '0.0.0',
     'resource': '2023.02.019',
   };
   Map<String, dynamic> remoteVersion = {
@@ -372,6 +372,9 @@ class _MyHomePageState extends State<MyHomePage>
     File config = File('config.json');
 
     if (!config.existsSync()) {
+      PackageInfo packageInfo = await PackageInfo.fromPlatform();
+      version['app'] = packageInfo.version;
+
       config.createSync();
       config.writeAsStringSync(
         jsonEncode({
@@ -404,7 +407,7 @@ class _MyHomePageState extends State<MyHomePage>
     }
   }
 
-  void writeConfig() {
+  void writeConfig() async {
     File config = File('$exePath/config.json');
 
     if (!config.existsSync()) {
@@ -412,6 +415,9 @@ class _MyHomePageState extends State<MyHomePage>
     }
 
     remember = autoLogin ? true : remember;
+
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    version['app'] = packageInfo.version;
 
     config.writeAsStringSync(
       jsonEncode({
@@ -1010,7 +1016,7 @@ class _MyHomePageState extends State<MyHomePage>
                                                           child: ElevatedButton(
                                                             onPressed:
                                                                 () async {
-                                                              var selected =
+                                                              String? selected =
                                                                   await FilePicker
                                                                       .platform
                                                                       .getDirectoryPath();
