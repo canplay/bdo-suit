@@ -72,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage>
   var autoLogin = false;
   var logined = false;
   Map<String, dynamic> version = {
-    'app': '2023.4.001',
+    'app': '2023.4.002',
     'resource': '2023.02.019',
   };
   Map<String, dynamic> remoteVersion = {
@@ -542,7 +542,7 @@ class _MyHomePageState extends State<MyHomePage>
         //   }
         // });
         setState(() {
-          status = '登录器有更新, 请重新下载';
+          status = '登录器有更新, 请到官网下载';
         });
       } else {
         needUpdate['app'] = false;
