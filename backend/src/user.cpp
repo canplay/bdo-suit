@@ -109,6 +109,7 @@ namespace api
 
 						ret["msg"] = info;
 						ret["status"] = 1;
+						return callback(HttpResponse::newHttpJsonResponse(ret));
 					}
 
 					ret["msg"] = "signup error";
