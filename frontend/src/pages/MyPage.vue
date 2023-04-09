@@ -279,6 +279,15 @@ const onUpdateInfo = (type: string) => {
       break;
 
     default:
+      if (
+        account.value.username === '' ||
+        account.value.password === '' ||
+        account.value.familyName === ''
+      ) {
+        $q.notify('用户名、密码或家族名为空');
+        return;
+      }
+
       useFetch()
         .post(
           store.backend + '/api/user/update/user',
