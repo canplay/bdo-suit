@@ -66,7 +66,12 @@ namespace api
 			}
 			else
 			{
-				std::string nickname = fmt::format("Adventurer{}", uuidSimple().substr(5, 5));
+				std::random_device seed;
+				std::ranlux48 engine(seed());
+				std::uniform_int_distribution<> distrib(10000, 99999);
+				int random = distrib(engine);
+
+				std::string nickname = fmt::format("Adventurer{}", random);
 
 				auto stmt1 = fmt::format("INSERT INTO [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblUserInformation] ([_registerDate], [_isValid], [_userId], [_userNickname], [_password], [_authenticKey], [_authenticExpiration], [_webAuthenticKey], [_lastLoginTime], [_lastLogoutTime], [_totalPlayTime], [_lastIp], [_lastServerNo], [_failPasswordCount], [_membershipType], [_isAdmissionToSpeedServer], [_isPcRoom], [_isGuestAccount], [_speedServerExpiration], [_surveyHWAndSW], [_isAccessBlanceChannel], [_isPremiumChannelPermission], [_isIgnoreCheckCustomizeOnly], [_preAuthenticKey], [_isAdultWorldUser], [_shutDownTime], [_atField], [_isCompleteTesterSubmit], [_isOtp], [_lastMacAddress], [_allCharacterTotalLevel], [_isAppliedNickNameChange]) VALUES('{}', '1', N'{},{}', N'{}', 0xF6ADBC1E77E92C0F1725B83DCFCFA139AD87EABCB262E1E3652B485F427961BDC57382A8A729331B7FF8A7A90FFBFE80ED43EF1060FE5F7716266DC48227AED0, 0, '1900-01-01 00:00:00.000', 0, '{}', '{}', 0, '127.0.0.1', -1, 0, 0, 2, '1', '0', '2033-12-30 00:00:00.000', '', '1', '0', '0', 0, '1', '1970-01-01 08:00:00.000', '', '0', '0', 0xF728BB816503A79FCCBF76A7AA2F6AF0294BBCCAB8E3140ECAEEAED08E2329A2228983F442A858128C9EA83ED089A12DA0D7076FF52E2F313466E7D42A0130CC, 0, '1')", timestamp, (*json)["username"].asString(), (*json)["password"].asString(), nickname, timestamp, timestamp, timestamp);
 
@@ -500,14 +505,35 @@ namespace api
 			return callback(HttpResponse::newHttpJsonResponse(ret));
 		}
 
+		Json::Value ret;
+
+		if ((*json)["username"].asString() == "" || (*json)["username"].asString() == "" || (*json)["username"].asString() == "")
+		{
+			ret["msg"] = "username or password or familyname is null";
+			ret["status"] = 0;
+			return callback(HttpResponse::newHttpJsonResponse(ret));
+		}
+
 		auto now = std::chrono::system_clock::now();
 		time_t time = std::chrono::system_clock::to_time_t(now);
 		auto timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(time));
 
-		Json::Value ret;
-
 		if (type == "user")
 		{
+			auto stmt = fmt::format("SELECT * FROM [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblUserInformation] WHERE _userId LIKE '{},%'", (*json)["username"].asString());
+
+			Json::Value ret;
+
+			auto r = MsSql::exec(stmt);
+			r.next();
+
+			if (r.rows() != 0)
+			{
+				ret["msg"] = "username already exist";
+				ret["status"] = 0;
+				return callback(HttpResponse::newHttpJsonResponse(ret));
+			}
+
 			auto stmt1 = fmt::format("UPDATE [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblUserInformation] SET [_userId] = N'{},{}', [_userNickname] = N'{}' WHERE [_userNo] = {}", (*json)["username"].asString(), (*json)["password"].asString(), utf8ToGBK((*json)["userNickname"].asString()), (*json)["userNo"].asInt64());
 
 			auto stmt2 = fmt::format("UPDATE [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblBriefUserInformation] SET [_userId] = N'{},{}', [_userNickname] = N'{}' WHERE [_userNo] = {}", (*json)["username"].asString(), (*json)["password"].asString(), utf8ToGBK((*json)["userNickname"].asString()), (*json)["userNo"].asInt64());
