@@ -651,33 +651,54 @@ namespace api
 			return callback(HttpResponse::newHttpJsonResponse(ret));
 		}
 
-		auto now = std::chrono::system_clock::now();
-		time_t time = std::chrono::system_clock::to_time_t(now);
-		auto timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(time));
-
-		auto stmt = fmt::format("UPDATE [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblCharacterInformation] SET [_characterName] = N'{}', [_currentPositionX] = {}, [_currentPositionY] = {}, [_currentPositionZ] = {}, [_returnPositionX] = {}, [_returnPositionY] = {}, [_returnPositionZ] = {} WHERE [_characterNo] = {}", utf8ToGBK((*json)["characterName"].asString()), (*json)["currentPositionX"].asInt64(), (*json)["currentPositionY"].asInt64(), (*json)["currentPositionZ"].asInt64(), (*json)["currentPositionX"].asInt64(), (*json)["currentPositionY"].asInt64(), (*json)["currentPositionZ"].asInt64(), (*json)["characterNo"].asInt64());
-
 		Json::Value ret;
+
+		auto stmt1 = fmt::format("SELECT COUNT(_characterNo) [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblCharacterInformation] WHERE [_characterName] = N'{}'", (*json)["characterName"].asString());
 
 		try
 		{
-			auto r = MsSql::exec(stmt);
+			auto r = MsSql::exec(stmt1);
 
-			if (r.affected_rows() >= 1)
+			if (r.rows() != 0)
 			{
-				if ((*json)["deletedDate"].asString() != "")
-				{
-					stmt = fmt::format("UPDATE [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblCharacterInformation] SET [_deletedDate] = '{}'", timestamp);
-					r = MsSql::exec(stmt);
-				}
-
-				ret["msg"] = "ok";
-				ret["status"] = 1;
+				ret["msg"] = "character name already exist";
+				ret["status"] = 0;
 			}
 			else
 			{
-				ret["msg"] = "character update error";
-				ret["status"] = 0;
+				auto now = std::chrono::system_clock::now();
+				time_t time = std::chrono::system_clock::to_time_t(now);
+				auto timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(time));
+
+				auto stmt = fmt::format("UPDATE [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblCharacterInformation] SET [_characterName] = N'{}', [_currentPositionX] = {}, [_currentPositionY] = {}, [_currentPositionZ] = {}, [_returnPositionX] = {}, [_returnPositionY] = {}, [_returnPositionZ] = {} WHERE [_characterNo] = {}", utf8ToGBK((*json)["characterName"].asString()), (*json)["currentPositionX"].asInt64(), (*json)["currentPositionY"].asInt64(), (*json)["currentPositionZ"].asInt64(), (*json)["currentPositionX"].asInt64(), (*json)["currentPositionY"].asInt64(), (*json)["currentPositionZ"].asInt64(), (*json)["characterNo"].asInt64());
+
+				try
+				{
+					auto r = MsSql::exec(stmt);
+
+					if (r.affected_rows() >= 1)
+					{
+						if ((*json)["deletedDate"].asString() != "")
+						{
+							stmt = fmt::format("UPDATE [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblCharacterInformation] SET [_deletedDate] = '{}'", timestamp);
+							r = MsSql::exec(stmt);
+						}
+
+						ret["msg"] = "ok";
+						ret["status"] = 1;
+					}
+					else
+					{
+						ret["msg"] = "character update error";
+						ret["status"] = 0;
+					}
+				}
+				catch (const std::exception& e)
+				{
+					spdlog::warn("character update error: {}", e.what());
+					ret["msg"] = e.what();
+					ret["status"] = 0;
+				}
 			}
 		}
 		catch (const std::exception& e)
