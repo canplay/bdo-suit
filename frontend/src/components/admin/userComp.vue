@@ -183,7 +183,7 @@
           <q-input
             class="col-2"
             v-model="dialog.user.userNickname"
-            label="角色名"
+            label="家族名"
           />
         </div>
 
@@ -255,13 +255,16 @@
             </q-td>
 
             <q-td v-else-if="props.col.name === 'deletedDate'" :props="props">
-              {{ props.value === '' ? 0 : 1 }}
-              <q-popup-edit v-model="props.value" auto-save v-slot="scope">
+              {{ props.row[props.col.name] === '' ? 0 : 1 }}
+              <q-popup-edit
+                v-model="props.row[props.col.name]"
+                auto-save
+                v-slot="scope"
+              >
                 <q-input
                   v-model="scope.value"
                   dense
                   autofocus
-                  counter
                   @keyup.enter="scope.set"
                 />
               </q-popup-edit>
@@ -276,13 +279,16 @@
                   white-space: nowrap;
                 "
               >
-                {{ props.value }}
-                <q-popup-edit v-model="props.value" auto-save v-slot="scope">
+                {{ props.row[props.col.name] }}
+                <q-popup-edit
+                  v-model="props.row[props.col.name]"
+                  auto-save
+                  v-slot="scope"
+                >
                   <q-input
                     v-model="scope.value"
                     dense
                     autofocus
-                    counter
                     @keyup.enter="scope.set"
                   />
                 </q-popup-edit>
@@ -598,12 +604,12 @@ const dialog = ref({
     userId: '',
     username: '',
     password: '',
-    userNo: 0,
+    userNo: '',
     userNickname: '',
     totalPlayTime: 0,
-    isValid: 1,
-    pcroom: 0,
-    membershipType: 0,
+    isValid: '',
+    pcroom: '',
+    membershipType: '',
     registerDate: '',
     lastLoginTime: '',
     lastLogoutTime: '',
@@ -854,6 +860,7 @@ const onRequest = (props: any) => {
     .post(
       store.backend + '/api/user/info',
       {
+        username: table.value.user.search,
         curPage: (page - 1) * rowsPerPage,
         maxPage: rowsPerPage === 0 ? rowsNumber : rowsPerPage,
         sortBy: sortBy === '' ? 'userNo' : sortBy,
@@ -911,7 +918,13 @@ const onQuery = () => {
   $q.loading.show();
 
   useFetch()
-    .get(store.backend + '/api/user/count', $q.cookies.get('canplay_token'))
+    .post(
+      store.backend + '/api/user/count',
+      {
+        username: table.value.user.search,
+      },
+      $q.cookies.get('canplay_token')
+    )
     .then((resp) => {
       table.value.user.pagination!.rowsNumber = parseInt(resp.data.msg);
       onRequest({ pagination: table.value.user.pagination });
@@ -1010,13 +1023,13 @@ const onSave = () => {
     .post(
       store.backend + '/api/user/admin/update',
       {
-        userNo: dialog.value.user.userNo,
+        userNo: parseInt(dialog.value.user.userNo),
         isValid: dialog.value.user.isValid,
         username: dialog.value.user.username,
         password: dialog.value.user.password,
         userNickname: dialog.value.user.userNickname,
-        pcroom: dialog.value.user.pcroom,
-        membershipType: dialog.value.user.membershipType,
+        pcroom: parseInt(dialog.value.user.pcroom),
+        membershipType: parseInt(dialog.value.user.membershipType),
       },
       $q.cookies.get('canplay_token')
     )
@@ -1041,29 +1054,29 @@ const onSave = () => {
             store.backend + '/api/user/admin/character/update',
             {
               characterName: element.characterName,
-              currentPositionX: element.currentPositionX,
-              currentPositionY: element.currentPositionY,
-              currentPositionZ: element.currentPositionZ,
-              level: element.level,
-              experience: element.experience,
-              skillPointLevel: element.skillPointLevel,
-              skillPointExperience: element.skillPointExperience,
-              remainedSkillPoint: element.remainedSkillPoint,
-              aquiredSkillPoint: element.aquiredSkillPoint,
-              tendency: element.tendency,
-              variedWeight: element.variedWeight,
-              hp: element.hp,
-              mp: element.mp,
-              sp: element.sp,
-              wp: element.wp,
-              inventorySlotCount: element.inventorySlotCount,
-              titleKey: element.titleKey,
-              killRewardCount: element.killRewardCount,
-              enchantFailCount: element.enchantFailCount,
-              offenceValue: element.offenceValue,
-              defenceValue: element.defenceValue,
-              awakenValue: element.awakenValue,
-              characterNo: element.characterNo,
+              currentPositionX: parseInt(element.currentPositionX),
+              currentPositionY: parseInt(element.currentPositionY),
+              currentPositionZ: parseInt(element.currentPositionZ),
+              level: parseInt(element.level),
+              experience: parseInt(element.experience),
+              skillPointLevel: parseInt(element.skillPointLevel),
+              skillPointExperience: parseInt(element.skillPointExperience),
+              remainedSkillPoint: parseInt(element.remainedSkillPoint),
+              aquiredSkillPoint: parseInt(element.aquiredSkillPoint),
+              tendency: parseInt(element.tendency),
+              variedWeight: parseInt(element.variedWeight),
+              hp: parseInt(element.hp),
+              mp: parseInt(element.mp),
+              sp: parseInt(element.sp),
+              wp: parseInt(element.wp),
+              inventorySlotCount: parseInt(element.inventorySlotCount),
+              titleKey: parseInt(element.titleKey),
+              killRewardCount: parseInt(element.killRewardCount),
+              enchantFailCount: parseInt(element.enchantFailCount),
+              offenceValue: parseInt(element.offenceValue),
+              defenceValue: parseInt(element.defenceValue),
+              awakenValue: parseInt(element.awakenValue),
+              characterNo: parseInt(element.characterNo),
               deletedDate: element.deletedDate === 1 ? '1' : '',
             },
             $q.cookies.get('canplay_token')

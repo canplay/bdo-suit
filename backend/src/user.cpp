@@ -9,7 +9,21 @@ namespace api
 {
 	void User::count(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const
 	{
+		std::shared_ptr<Json::Value> json = req->getJsonObject();
+		if (!json)
+		{
+			Json::Value ret;
+			ret["msg"] = "error";
+			ret["status"] = 0;
+			return callback(HttpResponse::newHttpJsonResponse(ret));
+		}
+
 		auto stmt = fmt::format("SELECT COUNT(_userNo) FROM [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblUserInformation]");
+
+		if ((*json)["username"].asString() != "")
+		{
+			stmt = fmt::format("{} WHERE _userId LIKE '%{}%'", stmt, (*json)["username"].asString());
+		}
 
 		Json::Value ret;
 
@@ -266,6 +280,11 @@ namespace api
 
 		std::string stmt = fmt::format("SELECT TOP {} * FROM [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblUserInformation] WHERE _userNo NOT IN(SELECT TOP {} _userNo FROM [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblUserInformation]", (*json)["maxPage"].asInt64(), (*json)["curPage"].asInt64());
 
+		if ((*json)["username"].asString() != "")
+		{
+			stmt = fmt::format("SELECT TOP {} * FROM [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblUserInformation] WHERE _userId LIKE '%{}%' AND _userNo NOT IN(SELECT TOP {} _userNo FROM [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblUserInformation] WHERE _userId LIKE '%{}%'", (*json)["maxPage"].asInt64(), (*json)["username"].asString(), (*json)["curPage"].asInt64(), (*json)["username"].asString());
+		}
+
 		if ((*json)["sortBy"].asString() != "")
 		{
 			stmt = fmt::format("{} ORDER BY [_{}] DESC) ORDER BY [_{}]", stmt, (*json)["sortBy"].asString(), (*json)["sortBy"].asString());
@@ -277,7 +296,7 @@ namespace api
 		}
 		else
 			stmt = fmt::format("{})", stmt);
-		;
+
 		Json::Value ret;
 
 		try
@@ -538,14 +557,14 @@ namespace api
 
 			auto stmt2 = fmt::format("UPDATE [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblBriefUserInformation] SET [_userId] = N'{},{}', [_userNickname] = N'{}' WHERE [_userNo] = {}", (*json)["username"].asString(), (*json)["password"].asString(), utf8ToGBK((*json)["userNickname"].asString()), (*json)["userNo"].asInt64());
 
-			auto stmt3 = fmt::format("SELECT COUNT(_userNo) [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblBriefUserInformation] WHERE [_userNo] = {}", (*json)["userNo"].asInt64());
+			auto stmt3 = fmt::format("SELECT COUNT(_userNo) FROM [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblBriefUserInformation] WHERE [_userNo] = {}", (*json)["userNo"].asInt64());
 
 			try
 			{
-				auto r3 = MsSql::exec(stmt1);
+				auto r3 = MsSql::exec(stmt3);
 				r3.next();
 
-				if (r3.rows() > 0)
+				if (r3.get<INT64>(0, 0) > 0)
 				{
 					auto r1 = MsSql::exec(stmt1);
 
@@ -653,52 +672,40 @@ namespace api
 
 		Json::Value ret;
 
-		auto stmt1 = fmt::format("SELECT COUNT(_characterNo) [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblCharacterInformation] WHERE [_characterName] = N'{}'", (*json)["characterName"].asString());
+		auto stmt = fmt::format("SELECT COUNT(_characterNo) FROM [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblCharacterInformation] WHERE [_characterName] = N'{}'", utf8ToGBK((*json)["characterName"].asString()));
 
 		try
 		{
-			auto r = MsSql::exec(stmt1);
+			auto r = MsSql::exec(stmt);
 
-			if (r.rows() != 0)
+			auto now = std::chrono::system_clock::now();
+			time_t time = std::chrono::system_clock::to_time_t(now);
+			auto timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(time));
+
+			stmt = fmt::format("UPDATE [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblCharacterInformation] SET [_currentPositionX] = {}, [_currentPositionY] = {}, [_currentPositionZ] = {}, [_returnPositionX] = {}, [_returnPositionY] = {}, [_returnPositionZ] = {} WHERE [_characterNo] = {}", (*json)["currentPositionX"].asInt64(), (*json)["currentPositionY"].asInt64(), (*json)["currentPositionZ"].asInt64(), (*json)["currentPositionX"].asInt64(), (*json)["currentPositionY"].asInt64(), (*json)["currentPositionZ"].asInt64(), (*json)["characterNo"].asInt64());
+
+			if (r.get<INT64>(0, 0) == 0)
 			{
-				ret["msg"] = "character name already exist";
-				ret["status"] = 0;
+				stmt = fmt::format("UPDATE [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblCharacterInformation] SET [_characterName] = N'{}', [_currentPositionX] = {}, [_currentPositionY] = {}, [_currentPositionZ] = {}, [_returnPositionX] = {}, [_returnPositionY] = {}, [_returnPositionZ] = {} WHERE [_characterNo] = {}", utf8ToGBK((*json)["characterName"].asString()), (*json)["currentPositionX"].asInt64(), (*json)["currentPositionY"].asInt64(), (*json)["currentPositionZ"].asInt64(), (*json)["currentPositionX"].asInt64(), (*json)["currentPositionY"].asInt64(), (*json)["currentPositionZ"].asInt64(), (*json)["characterNo"].asInt64());
+			}
+
+			auto r = MsSql::exec(stmt);
+
+			if (r.affected_rows() >= 1)
+			{
+				if ((*json)["deletedDate"].asString() != "")
+				{
+					stmt = fmt::format("UPDATE [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblCharacterInformation] SET [_deletedDate] = '{}'", timestamp);
+					r = MsSql::exec(stmt);
+				}
+
+				ret["msg"] = "ok";
+				ret["status"] = 1;
 			}
 			else
 			{
-				auto now = std::chrono::system_clock::now();
-				time_t time = std::chrono::system_clock::to_time_t(now);
-				auto timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(time));
-
-				auto stmt = fmt::format("UPDATE [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblCharacterInformation] SET [_characterName] = N'{}', [_currentPositionX] = {}, [_currentPositionY] = {}, [_currentPositionZ] = {}, [_returnPositionX] = {}, [_returnPositionY] = {}, [_returnPositionZ] = {} WHERE [_characterNo] = {}", utf8ToGBK((*json)["characterName"].asString()), (*json)["currentPositionX"].asInt64(), (*json)["currentPositionY"].asInt64(), (*json)["currentPositionZ"].asInt64(), (*json)["currentPositionX"].asInt64(), (*json)["currentPositionY"].asInt64(), (*json)["currentPositionZ"].asInt64(), (*json)["characterNo"].asInt64());
-
-				try
-				{
-					auto r = MsSql::exec(stmt);
-
-					if (r.affected_rows() >= 1)
-					{
-						if ((*json)["deletedDate"].asString() != "")
-						{
-							stmt = fmt::format("UPDATE [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblCharacterInformation] SET [_deletedDate] = '{}'", timestamp);
-							r = MsSql::exec(stmt);
-						}
-
-						ret["msg"] = "ok";
-						ret["status"] = 1;
-					}
-					else
-					{
-						ret["msg"] = "character update error";
-						ret["status"] = 0;
-					}
-				}
-				catch (const std::exception& e)
-				{
-					spdlog::warn("character update error: {}", e.what());
-					ret["msg"] = e.what();
-					ret["status"] = 0;
-				}
+				ret["msg"] = "character update error";
+				ret["status"] = 0;
 			}
 		}
 		catch (const std::exception& e)
@@ -726,20 +733,20 @@ namespace api
 		time_t time = std::chrono::system_clock::to_time_t(now);
 		auto timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(time));
 
-		auto stmt1 = fmt::format("UPDATE [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblUserInformation] SET [_isValid] = '{}', [_userId] = N'{},{}', [_userNickname] = N'{}', [_isPcRoom] = {}, [_membershipType] = {} WHERE [_userNo] = {}", (*json)["isValid"].asInt64(), (*json)["username"].asString(), (*json)["password"].asString(), utf8ToGBK((*json)["userNickname"].asString()), (*json)["pcroom"].asInt64(), (*json)["membershipType"].asInt64(), (*json)["userNo"].asInt64());
-
-		auto stmt2 = fmt::format("UPDATE [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblBriefUserInformation] SET [_userId] = N'{},{}', [_userNickname] = N'{}' WHERE [_userNo] = {}", (*json)["username"].asString(), (*json)["password"].asString(), utf8ToGBK((*json)["userNickname"].asString()), (*json)["userNo"].asInt64());
-
-		auto stmt3 = fmt::format("SELECT COUNT(_userNo) [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblUserInformation] WHERE [_userNo] = {}", (*json)["userNo"].asInt64());
-
 		Json::Value ret;
 
 		try
 		{
-			auto r3 = MsSql::exec(stmt1);
+			auto stmt1 = fmt::format("UPDATE [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblUserInformation] SET [_isValid] = '{}', [_userId] = N'{},{}', [_userNickname] = N'{}', [_isPcRoom] = {}, [_membershipType] = {} WHERE [_userNo] = {}", (*json)["isValid"].asString(), (*json)["username"].asString(), (*json)["password"].asString(), utf8ToGBK((*json)["userNickname"].asString()), (*json)["pcroom"].asInt64(), (*json)["membershipType"].asInt64(), (*json)["userNo"].asInt64());
+
+			auto stmt2 = fmt::format("UPDATE [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblBriefUserInformation] SET [_userId] = N'{},{}', [_userNickname] = N'{}' WHERE [_userNo] = {}", (*json)["username"].asString(), (*json)["password"].asString(), utf8ToGBK((*json)["userNickname"].asString()), (*json)["userNo"].asInt64());
+
+			auto stmt3 = fmt::format("SELECT COUNT(_userNo) FROM [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblBriefUserInformation] WHERE [_userNo] = {}", (*json)["userNo"].asInt64());
+
+			auto r3 = MsSql::exec(stmt3);
 			r3.next();
 
-			if (r3.rows() > 0)
+			if (r3.get<INT64>(0, 0) > 0)
 			{
 				auto r1 = MsSql::exec(stmt1);
 
@@ -754,35 +761,35 @@ namespace api
 					}
 					else
 					{
-						ret["msg"] = "user update error";
+						ret["msg"] = "admin update error";
 						ret["status"] = 0;
 					}
 				}
 				else
 				{
-					ret["msg"] = "user update error";
+					ret["msg"] = "admin update error";
 					ret["status"] = 0;
 				}
 			}
 			else
 			{
-				auto r2 = MsSql::exec(stmt2);
+				auto r = MsSql::exec(stmt1);
 
-				if (r2.affected_rows() >= 1)
+				if (r.affected_rows() >= 1)
 				{
 					ret["msg"] = "ok";
 					ret["status"] = 1;
 				}
 				else
 				{
-					ret["msg"] = "user update error";
+					ret["msg"] = "admin update error";
 					ret["status"] = 0;
 				}
 			}
 		}
 		catch (const std::exception& e)
 		{
-			spdlog::warn("user update error: {}", e.what());
+			spdlog::warn("admin update error: {}", e.what());
 			ret["msg"] = e.what();
 			ret["status"] = 0;
 		}

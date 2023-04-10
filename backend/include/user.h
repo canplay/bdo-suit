@@ -10,7 +10,7 @@ namespace api
 	{
 	public:
 		METHOD_LIST_BEGIN
-			METHOD_ADD(User::count, "/count", Options, Get, "api::JwtFilter");
+			METHOD_ADD(User::count, "/count", Options, Post, "api::JwtFilter");
 		METHOD_ADD(User::signup, "/signup", Options, Post, "api::LogFilter");
 		METHOD_ADD(User::signin, "/signin", Options, Post, "api::LogFilter");
 		METHOD_ADD(User::signout, "/signout", Options, Post, "api::JwtFilter");
