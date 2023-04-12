@@ -672,24 +672,27 @@ namespace api
 
 		Json::Value ret;
 
-		auto stmt = fmt::format("SELECT COUNT(_characterNo) FROM [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblCharacterInformation] WHERE [_characterName] = N'{}'", utf8ToGBK((*json)["characterName"].asString()));
+		auto stmt = fmt::format("SELECT COUNT(_characterNo) FROM [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblCharacterInformation] WHERE [_characterName] = N'{}'", utf8ToGBK((*json)["characterNameOld"].asString()));
 
 		try
 		{
 			auto r = MsSql::exec(stmt);
+			r.next();
 
 			auto now = std::chrono::system_clock::now();
 			time_t time = std::chrono::system_clock::to_time_t(now);
 			auto timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(time));
 
-			stmt = fmt::format("UPDATE [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblCharacterInformation] SET [_currentPositionX] = {}, [_currentPositionY] = {}, [_currentPositionZ] = {}, [_returnPositionX] = {}, [_returnPositionY] = {}, [_returnPositionZ] = {} WHERE [_characterNo] = {}", (*json)["currentPositionX"].asInt64(), (*json)["currentPositionY"].asInt64(), (*json)["currentPositionZ"].asInt64(), (*json)["currentPositionX"].asInt64(), (*json)["currentPositionY"].asInt64(), (*json)["currentPositionZ"].asInt64(), (*json)["characterNo"].asInt64());
-
-			if (r.get<INT64>(0, 0) == 0)
+			if (r.get<INT64>(0, 0) != 0)
 			{
 				stmt = fmt::format("UPDATE [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblCharacterInformation] SET [_characterName] = N'{}', [_currentPositionX] = {}, [_currentPositionY] = {}, [_currentPositionZ] = {}, [_returnPositionX] = {}, [_returnPositionY] = {}, [_returnPositionZ] = {} WHERE [_characterNo] = {}", utf8ToGBK((*json)["characterName"].asString()), (*json)["currentPositionX"].asInt64(), (*json)["currentPositionY"].asInt64(), (*json)["currentPositionZ"].asInt64(), (*json)["currentPositionX"].asInt64(), (*json)["currentPositionY"].asInt64(), (*json)["currentPositionZ"].asInt64(), (*json)["characterNo"].asInt64());
 			}
+			else
+			{
+				stmt = fmt::format("UPDATE [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblCharacterInformation] SET [_currentPositionX] = {}, [_currentPositionY] = {}, [_currentPositionZ] = {}, [_returnPositionX] = {}, [_returnPositionY] = {}, [_returnPositionZ] = {} WHERE [_characterNo] = {}", (*json)["currentPositionX"].asInt64(), (*json)["currentPositionY"].asInt64(), (*json)["currentPositionZ"].asInt64(), (*json)["currentPositionX"].asInt64(), (*json)["currentPositionY"].asInt64(), (*json)["currentPositionZ"].asInt64(), (*json)["characterNo"].asInt64());
+			}
 
-			auto r = MsSql::exec(stmt);
+			r = MsSql::exec(stmt);
 
 			if (r.affected_rows() >= 1)
 			{

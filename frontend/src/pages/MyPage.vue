@@ -419,6 +419,7 @@ const onCharacterModify = () => {
       {
         characterNo: dialog.value.character.characterNo,
         characterName: dialog.value.name,
+        characterNameOld: dialog.value.character.characterName,
         currentPositionX: parseInt(dialog.value.x),
         currentPositionY: parseInt(dialog.value.y),
         currentPositionZ: parseInt(dialog.value.z),
