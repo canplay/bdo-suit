@@ -144,11 +144,13 @@ namespace api
 			{
 				ret["msg"] = "ok";
 				ret["status"] = 1;
+				callback(HttpResponse::newHttpJsonResponse(ret));
 			}
 			else
 			{
 				ret["msg"] = "version update error";
 				ret["status"] = 0;
+				callback(HttpResponse::newHttpJsonResponse(ret));
 			}
 		}
 		catch (const std::exception& e)
@@ -156,9 +158,8 @@ namespace api
 			spdlog::warn("version update error: {}", e.what());
 			ret["msg"] = e.what();
 			ret["status"] = 0;
+			callback(HttpResponse::newHttpJsonResponse(ret));
 		}
-
-		callback(HttpResponse::newHttpJsonResponse(ret));
 	}
 
 	void Version::info(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const
@@ -215,15 +216,15 @@ namespace api
 
 			ret["msg"] = infos;
 			ret["status"] = 1;
+			callback(HttpResponse::newHttpJsonResponse(ret));
 		}
 		catch (const std::exception& e)
 		{
 			spdlog::warn("version info error: {}", e.what());
 			ret["msg"] = e.what();
 			ret["status"] = 0;
+			callback(HttpResponse::newHttpJsonResponse(ret));
 		}
-
-		callback(HttpResponse::newHttpJsonResponse(ret));
 	}
 
 	void Version::latest(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const
@@ -258,15 +259,15 @@ namespace api
 
 			ret["msg"] = infos;
 			ret["status"] = 1;
+			callback(HttpResponse::newHttpJsonResponse(ret));
 		}
 		catch (const std::exception& e)
 		{
 			spdlog::warn("version latest error: {}", e.what());
 			ret["msg"] = e.what();
 			ret["status"] = 0;
+			callback(HttpResponse::newHttpJsonResponse(ret));
 		}
-
-		callback(HttpResponse::newHttpJsonResponse(ret));
 	}
 
 	void Version::diffStatus(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback)

@@ -308,18 +308,23 @@ class _MyHomePageState extends State<MyHomePage>
   void runGame() async {
     EasyLoading.show(status: "正在启动游戏...");
 
-    var shell = Shell(
-      throwOnError: false,
-      workingDirectory: '${clientPathController.text}\\bin64',
-    );
-    final r = await shell.run(
-        'start BlackDesert64.exe ${usernameController.text},${passwordController.text}');
+    try {
+      var shell = Shell(
+        throwOnError: false,
+        workingDirectory: '${clientPathController.text}\\bin64',
+      );
+      final r = await shell.run(
+          'start BlackDesert64.exe ${usernameController.text},${passwordController.text}');
 
-    if (r.last.exitCode <= 0) {
+      if (r.last.exitCode <= 0) {
+        EasyLoading.dismiss();
+        EasyLoading.showError('启动游戏失败');
+      } else {
+        EasyLoading.dismiss();
+      }
+    } catch (e) {
       EasyLoading.dismiss();
-      EasyLoading.showError('启动游戏失败');
-    } else {
-      EasyLoading.dismiss();
+      EasyLoading.showError('启动游戏失败 - ${e.toString()}');
     }
   }
 

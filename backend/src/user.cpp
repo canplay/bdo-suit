@@ -35,15 +35,15 @@ namespace api
 			r.next();
 			ret["msg"] = r.get<INT64>(0, 0);
 			ret["status"] = 1;
+			callback(HttpResponse::newHttpJsonResponse(ret));
 		}
 		catch (const std::exception& e)
 		{
 			spdlog::warn("user count error: {}", e.what());
 			ret["msg"] = e.what();
 			ret["status"] = 0;
+			callback(HttpResponse::newHttpJsonResponse(ret));
 		}
-
-		callback(HttpResponse::newHttpJsonResponse(ret));
 	}
 
 	void User::signup(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const
@@ -133,11 +133,13 @@ namespace api
 
 					ret["msg"] = "signup error";
 					ret["status"] = 0;
+					callback(HttpResponse::newHttpJsonResponse(ret));
 				}
 				else
 				{
 					ret["msg"] = "signup error";
 					ret["status"] = 0;
+					callback(HttpResponse::newHttpJsonResponse(ret));
 				}
 			}
 		}
@@ -146,9 +148,8 @@ namespace api
 			spdlog::warn("signup error: {}", e.what());
 			ret["msg"] = e.what();
 			ret["status"] = 0;
+			callback(HttpResponse::newHttpJsonResponse(ret));
 		}
-
-		callback(HttpResponse::newHttpJsonResponse(ret));
 	}
 
 	void User::signin(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const
@@ -247,11 +248,13 @@ namespace api
 
 				ret["msg"] = info;
 				ret["status"] = 1;
+				callback(HttpResponse::newHttpJsonResponse(ret));
 			}
 			else
 			{
 				ret["msg"] = "username or password error";
 				ret["status"] = 0;
+				callback(HttpResponse::newHttpJsonResponse(ret));
 			}
 		}
 		catch (const std::exception& e)
@@ -259,9 +262,8 @@ namespace api
 			spdlog::warn("signin error: {}", e.what());
 			ret["msg"] = e.what();
 			ret["status"] = 0;
+			callback(HttpResponse::newHttpJsonResponse(ret));
 		}
-
-		callback(HttpResponse::newHttpJsonResponse(ret));
 	}
 
 	void User::signout(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const
@@ -366,15 +368,15 @@ namespace api
 
 			ret["msg"] = infos;
 			ret["status"] = 1;
+			callback(HttpResponse::newHttpJsonResponse(ret));
 		}
 		catch (const std::exception& e)
 		{
 			spdlog::warn("user info error: {}", e.what());
 			ret["msg"] = e.what();
 			ret["status"] = 0;
+			callback(HttpResponse::newHttpJsonResponse(ret));
 		}
-
-		callback(HttpResponse::newHttpJsonResponse(ret));
 	}
 
 	void User::infoOne(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, const std::string& id) const
@@ -443,15 +445,15 @@ namespace api
 
 			ret["msg"] = info;
 			ret["status"] = 1;
+			callback(HttpResponse::newHttpJsonResponse(ret));
 		}
 		catch (const std::exception& e)
 		{
 			spdlog::warn("user info one error: {}", e.what());
 			ret["msg"] = e.what();
 			ret["status"] = 0;
+			callback(HttpResponse::newHttpJsonResponse(ret));
 		}
-
-		callback(HttpResponse::newHttpJsonResponse(ret));
 	}
 
 	void User::mail(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, const std::string type) const
@@ -496,11 +498,13 @@ namespace api
 			{
 				ret["msg"] = "ok";
 				ret["status"] = 1;
+				callback(HttpResponse::newHttpJsonResponse(ret));
 			}
 			else
 			{
 				ret["msg"] = "no mail";
 				ret["status"] = 0;
+				callback(HttpResponse::newHttpJsonResponse(ret));
 			}
 		}
 		catch (const std::exception& e)
@@ -508,9 +512,8 @@ namespace api
 			spdlog::warn("mail error: {}", e.what());
 			ret["msg"] = e.what();
 			ret["status"] = 0;
+			callback(HttpResponse::newHttpJsonResponse(ret));
 		}
-
-		callback(HttpResponse::newHttpJsonResponse(ret));
 	}
 
 	void User::update(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, const std::string type) const
@@ -546,7 +549,7 @@ namespace api
 			auto r = MsSql::exec(stmt);
 			r.next();
 
-			if (r.rows() != 0)
+			if (r.rows() > 1)
 			{
 				ret["msg"] = "username already exist";
 				ret["status"] = 0;
@@ -576,17 +579,20 @@ namespace api
 						{
 							ret["msg"] = "ok";
 							ret["status"] = 1;
+							callback(HttpResponse::newHttpJsonResponse(ret));
 						}
 						else
 						{
 							ret["msg"] = "user update error";
 							ret["status"] = 0;
+							callback(HttpResponse::newHttpJsonResponse(ret));
 						}
 					}
 					else
 					{
 						ret["msg"] = "user update error";
 						ret["status"] = 0;
+						callback(HttpResponse::newHttpJsonResponse(ret));
 					}
 				}
 				else
@@ -597,11 +603,13 @@ namespace api
 					{
 						ret["msg"] = "ok";
 						ret["status"] = 1;
+						callback(HttpResponse::newHttpJsonResponse(ret));
 					}
 					else
 					{
 						ret["msg"] = "user update error";
 						ret["status"] = 0;
+						callback(HttpResponse::newHttpJsonResponse(ret));
 					}
 				}
 			}
@@ -610,11 +618,12 @@ namespace api
 				spdlog::warn("user update error: {}", e.what());
 				ret["msg"] = e.what();
 				ret["status"] = 0;
+				callback(HttpResponse::newHttpJsonResponse(ret));
 			}
 		}
 		else if (type == "map")
 		{
-			async_run([=]()->Task<void>
+			async_run([=]()->Task<>
 			{
 				for (size_t i = 1; i < 2001; ++i)
 				{
@@ -630,10 +639,11 @@ namespace api
 
 			ret["msg"] = "ok";
 			ret["status"] = 1;
+			callback(HttpResponse::newHttpJsonResponse(ret));
 		}
 		else if (type == "knowledge")
 		{
-			async_run([=]()->Task<void>
+			async_run([=]()->Task<>
 			{
 				for (size_t i = 1; i < 10853; ++i)
 				{
@@ -649,14 +659,14 @@ namespace api
 
 			ret["msg"] = "ok";
 			ret["status"] = 1;
+			callback(HttpResponse::newHttpJsonResponse(ret));
 		}
 		else
 		{
 			ret["msg"] = "no method";
 			ret["status"] = 0;
+			callback(HttpResponse::newHttpJsonResponse(ret));
 		}
-
-		callback(HttpResponse::newHttpJsonResponse(ret));
 	}
 
 	void User::characterUpdate(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const
@@ -704,11 +714,13 @@ namespace api
 
 				ret["msg"] = "ok";
 				ret["status"] = 1;
+				callback(HttpResponse::newHttpJsonResponse(ret));
 			}
 			else
 			{
 				ret["msg"] = "character update error";
 				ret["status"] = 0;
+				callback(HttpResponse::newHttpJsonResponse(ret));
 			}
 		}
 		catch (const std::exception& e)
@@ -716,9 +728,8 @@ namespace api
 			spdlog::warn("character update error: {}", e.what());
 			ret["msg"] = e.what();
 			ret["status"] = 0;
+			callback(HttpResponse::newHttpJsonResponse(ret));
 		}
-
-		callback(HttpResponse::newHttpJsonResponse(ret));
 	}
 
 	void User::adminUpdate(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const
@@ -761,17 +772,20 @@ namespace api
 					{
 						ret["msg"] = "ok";
 						ret["status"] = 1;
+						callback(HttpResponse::newHttpJsonResponse(ret));
 					}
 					else
 					{
 						ret["msg"] = "admin update error";
 						ret["status"] = 0;
+						callback(HttpResponse::newHttpJsonResponse(ret));
 					}
 				}
 				else
 				{
 					ret["msg"] = "admin update error";
 					ret["status"] = 0;
+					callback(HttpResponse::newHttpJsonResponse(ret));
 				}
 			}
 			else
@@ -782,11 +796,13 @@ namespace api
 				{
 					ret["msg"] = "ok";
 					ret["status"] = 1;
+					callback(HttpResponse::newHttpJsonResponse(ret));
 				}
 				else
 				{
 					ret["msg"] = "admin update error";
 					ret["status"] = 0;
+					callback(HttpResponse::newHttpJsonResponse(ret));
 				}
 			}
 		}
@@ -795,9 +811,8 @@ namespace api
 			spdlog::warn("admin update error: {}", e.what());
 			ret["msg"] = e.what();
 			ret["status"] = 0;
+			callback(HttpResponse::newHttpJsonResponse(ret));
 		}
-
-		callback(HttpResponse::newHttpJsonResponse(ret));
 	}
 
 	void User::adminCharacterUpdate(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const
@@ -833,11 +848,13 @@ namespace api
 
 				ret["msg"] = "ok";
 				ret["status"] = 1;
+				callback(HttpResponse::newHttpJsonResponse(ret));
 			}
 			else
 			{
 				ret["msg"] = "character update error";
 				ret["status"] = 0;
+				callback(HttpResponse::newHttpJsonResponse(ret));
 			}
 		}
 		catch (const std::exception& e)
@@ -845,9 +862,8 @@ namespace api
 			spdlog::warn("character update error: {}", e.what());
 			ret["msg"] = e.what();
 			ret["status"] = 0;
+			callback(HttpResponse::newHttpJsonResponse(ret));
 		}
-
-		callback(HttpResponse::newHttpJsonResponse(ret));
 	}
 
 	void User::adminMail(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const
@@ -891,11 +907,13 @@ namespace api
 			{
 				ret["msg"] = "ok";
 				ret["status"] = 1;
+				callback(HttpResponse::newHttpJsonResponse(ret));
 			}
 			else
 			{
 				ret["msg"] = "admin mail add error";
 				ret["status"] = 0;
+				callback(HttpResponse::newHttpJsonResponse(ret));
 			}
 		}
 		catch (const std::exception& e)
@@ -903,9 +921,8 @@ namespace api
 			spdlog::warn("admin mail add error: {}", e.what());
 			ret["msg"] = e.what();
 			ret["status"] = 0;
+			callback(HttpResponse::newHttpJsonResponse(ret));
 		}
-
-		callback(HttpResponse::newHttpJsonResponse(ret));
 	}
 
 	void User::adminGmCount(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, const std::string type) const
@@ -928,11 +945,13 @@ namespace api
 			{
 				ret["msg"] = r.get<INT64>(0, 0);
 				ret["status"] = 1;
+				callback(HttpResponse::newHttpJsonResponse(ret));
 			}
 			else
 			{
 				ret["msg"] = "admin count error";
 				ret["status"] = 0;
+				callback(HttpResponse::newHttpJsonResponse(ret));
 			}
 		}
 		catch (const std::exception& e)
@@ -940,9 +959,8 @@ namespace api
 			spdlog::warn("admin count error: {}", e.what());
 			ret["msg"] = e.what();
 			ret["status"] = 0;
+			callback(HttpResponse::newHttpJsonResponse(ret));
 		}
-
-		callback(HttpResponse::newHttpJsonResponse(ret));
 	}
 
 	void User::adminGmInfo(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, const std::string type) const
@@ -992,12 +1010,14 @@ namespace api
 
 				ret["msg"] = infos;
 				ret["status"] = 1;
+				callback(HttpResponse::newHttpJsonResponse(ret));
 			}
 			catch (const std::exception& e)
 			{
 				spdlog::warn("admin info error: {}", e.what());
 				ret["msg"] = e.what();
 				ret["status"] = 0;
+				callback(HttpResponse::newHttpJsonResponse(ret));
 			}
 		}
 		else
@@ -1038,16 +1058,16 @@ namespace api
 
 				ret["msg"] = infos;
 				ret["status"] = 1;
+				callback(HttpResponse::newHttpJsonResponse(ret));
 			}
 			catch (const std::exception& e)
 			{
 				spdlog::warn("admin info error: {}", e.what());
 				ret["msg"] = e.what();
 				ret["status"] = 0;
+				callback(HttpResponse::newHttpJsonResponse(ret));
 			}
 		}
-
-		callback(HttpResponse::newHttpJsonResponse(ret));
 	}
 
 	void User::adminGmUpdate(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, const std::string type) const
@@ -1086,18 +1106,21 @@ namespace api
 					{
 						ret["msg"] = "ok";
 						ret["status"] = 1;
+						callback(HttpResponse::newHttpJsonResponse(ret));
 					}
 					else
 					{
-						ret["msg"] = "admin update error";
+						ret["msg"] = "admin gm update error";
 						ret["status"] = 0;
+						callback(HttpResponse::newHttpJsonResponse(ret));
 					}
 				}
 				catch (const std::exception& e)
 				{
-					spdlog::warn("admin update error: {}", e.what());
+					spdlog::warn("admin gm update error: {}", e.what());
 					ret["msg"] = e.what();
 					ret["status"] = 0;
+					callback(HttpResponse::newHttpJsonResponse(ret));
 				}
 				break;
 			case Post:
@@ -1116,27 +1139,29 @@ namespace api
 					{
 						ret["msg"] = "ok";
 						ret["status"] = 1;
+						callback(HttpResponse::newHttpJsonResponse(ret));
 					}
 					else
 					{
-						ret["msg"] = "admin delete error";
+						ret["msg"] = "admin gm delete error";
 						ret["status"] = 0;
+						callback(HttpResponse::newHttpJsonResponse(ret));
 					}
 				}
 				catch (const std::exception& e)
 				{
-					spdlog::warn("admin delete error: {}", e.what());
+					spdlog::warn("admin gm delete error: {}", e.what());
 					ret["msg"] = e.what();
 					ret["status"] = 0;
+					callback(HttpResponse::newHttpJsonResponse(ret));
 				}
 				break;
 			default:
-				ret["msg"] = "admin set no method";
+				ret["msg"] = "admin gm update no method";
 				ret["status"] = 0;
+				callback(HttpResponse::newHttpJsonResponse(ret));
 				break;
 		}
-
-		callback(HttpResponse::newHttpJsonResponse(ret));
 	}
 
 	void User::blockChat(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const
@@ -1166,11 +1191,13 @@ namespace api
 			{
 				ret["msg"] = "ok";
 				ret["status"] = 1;
+				callback(HttpResponse::newHttpJsonResponse(ret));
 			}
 			else
 			{
 				ret["msg"] = "block chat add error";
 				ret["status"] = 0;
+				callback(HttpResponse::newHttpJsonResponse(ret));
 			}
 		}
 		catch (const std::exception& e)
@@ -1178,9 +1205,8 @@ namespace api
 			spdlog::warn("block chat add error: {}", e.what());
 			ret["msg"] = e.what();
 			ret["status"] = 0;
+			callback(HttpResponse::newHttpJsonResponse(ret));
 		}
-
-		callback(HttpResponse::newHttpJsonResponse(ret));
 	}
 
 	void User::blockUser(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const
@@ -1210,11 +1236,13 @@ namespace api
 			{
 				ret["msg"] = "ok";
 				ret["status"] = 1;
+				callback(HttpResponse::newHttpJsonResponse(ret));
 			}
 			else
 			{
 				ret["msg"] = "block user add error";
 				ret["status"] = 0;
+				callback(HttpResponse::newHttpJsonResponse(ret));
 			}
 		}
 		catch (const std::exception& e)
@@ -1222,9 +1250,8 @@ namespace api
 			spdlog::warn("block user add error: {}", e.what());
 			ret["msg"] = e.what();
 			ret["status"] = 0;
+			callback(HttpResponse::newHttpJsonResponse(ret));
 		}
-
-		callback(HttpResponse::newHttpJsonResponse(ret));
 	}
 
 	void User::blockIp(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const
@@ -1254,11 +1281,13 @@ namespace api
 			{
 				ret["msg"] = "ok";
 				ret["status"] = 1;
+				callback(HttpResponse::newHttpJsonResponse(ret));
 			}
 			else
 			{
 				ret["msg"] = "block ip add error";
 				ret["status"] = 0;
+				callback(HttpResponse::newHttpJsonResponse(ret));
 			}
 		}
 		catch (const std::exception& e)
@@ -1266,9 +1295,8 @@ namespace api
 			spdlog::warn("block ip add error: {}", e.what());
 			ret["msg"] = e.what();
 			ret["status"] = 0;
+			callback(HttpResponse::newHttpJsonResponse(ret));
 		}
-
-		callback(HttpResponse::newHttpJsonResponse(ret));
 	}
 
 	Json::Value User::getPermission(const std::string userNo) const
