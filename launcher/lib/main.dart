@@ -316,11 +316,11 @@ class _MyHomePageState extends State<MyHomePage>
       final r = await shell.run(
           'start BlackDesert64.exe ${usernameController.text},${passwordController.text}');
 
-      if (r.last.exitCode <= 0) {
+      if (r.last.exitCode == 0) {
         EasyLoading.dismiss();
-        EasyLoading.showError('启动游戏失败');
       } else {
         EasyLoading.dismiss();
+        EasyLoading.showError('启动游戏失败');
       }
     } catch (e) {
       EasyLoading.dismiss();

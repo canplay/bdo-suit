@@ -1,1 +1,1 @@
-web 和 launcher 后端
+frontend 和 launcher 后端
