@@ -67,13 +67,13 @@ class _MyHomePageState extends State<MyHomePage>
 
   var btnDisable = true;
   var exePath = Directory.current.path;
-  var remoteUrl = '';
+  var remoteUrl = 'http://1.13.22.82:51530';
   var remember = false;
   var autoLogin = false;
   var logined = false;
   Map<String, dynamic> version = {
     'app': '0.0.0',
-    'resource': '2023.02.019',
+    'resource': '2023.5.001',
   };
   Map<String, dynamic> remoteVersion = {
     'app': {
@@ -509,7 +509,7 @@ class _MyHomePageState extends State<MyHomePage>
         status = '正在检查更新...';
       });
 
-      Response resp = await dio.get("$remoteUrl/api/version/latest",
+      Response resp = await dio.get("$remoteUrl/api/version/v1/latest",
           options: Options(contentType: "application/json"));
 
       if (resp.data["status"] == 0) {
