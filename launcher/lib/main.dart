@@ -67,7 +67,7 @@ class _MyHomePageState extends State<MyHomePage>
 
   var btnDisable = true;
   var exePath = Directory.current.path;
-  var remoteUrl = 'http://1.13.22.82:51530';
+  var remoteUrl = 'http://36.102.195.102:51530';
   var remember = false;
   var autoLogin = false;
   var logined = false;
@@ -383,7 +383,7 @@ class _MyHomePageState extends State<MyHomePage>
       config.createSync();
       config.writeAsStringSync(
         jsonEncode({
-          "url": "http://1.13.22.82:51530",
+          "url": "http://36.102.195.102:51530",
           "username": '',
           "password": '',
           "remember": false,
@@ -426,7 +426,7 @@ class _MyHomePageState extends State<MyHomePage>
 
     config.writeAsStringSync(
       jsonEncode({
-        "url": "http://1.13.22.82:51530",
+        "url": "http://36.102.195.102:51530",
         "username": remember ? usernameController.text : '',
         "password": remember ? passwordController.text : '',
         "remember": remember,
