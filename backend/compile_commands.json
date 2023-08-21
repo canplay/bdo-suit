@@ -1,0 +1,76 @@
+[
+{
+  "directory": "E:\\Black Desert\\bdo-suit\\backend",
+  "arguments": ["C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.37.32822\\bin\\HostX64\\x64\\cl.exe", "/c", "/nologo", "/Zi", "/FS", "/Fdbuild\\windows\\x64\\release\\backend\\compile.backend.pdb", "/W3", "/O2", "/fp:fast", "/std:c++20", "/MD", "/IF:\\Code\\vcpkg\\installed\\x64-windows\\include\\crashpad", "/Icommon\\include", "/Iinclude", "/D_CRT_SECURE_NO_WARNINGS", "/DNOMINMAX", "/EHsc", "/IF:\\Code\\vcpkg\\installed\\x64-windows\\include", "/wd4819", "/Fobuild\\.objs\\backend\\windows\\x64\\releasedbg\\common\\src\\blowfish.cpp.obj", "common\\src\\blowfish.cpp"],
+  "file": "common\\src\\blowfish.cpp"
+},
+{
+  "directory": "E:\\Black Desert\\bdo-suit\\backend",
+  "arguments": ["C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.37.32822\\bin\\HostX64\\x64\\cl.exe", "/c", "/nologo", "/Zi", "/FS", "/Fdbuild\\windows\\x64\\release\\backend\\compile.backend.pdb", "/W3", "/O2", "/fp:fast", "/std:c++20", "/MD", "/IF:\\Code\\vcpkg\\installed\\x64-windows\\include\\crashpad", "/Icommon\\include", "/Iinclude", "/D_CRT_SECURE_NO_WARNINGS", "/DNOMINMAX", "/EHsc", "/IF:\\Code\\vcpkg\\installed\\x64-windows\\include", "/wd4819", "/Fobuild\\.objs\\backend\\windows\\x64\\releasedbg\\common\\src\\filter.cpp.obj", "common\\src\\filter.cpp"],
+  "file": "common\\src\\filter.cpp"
+},
+{
+  "directory": "E:\\Black Desert\\bdo-suit\\backend",
+  "arguments": ["C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.37.32822\\bin\\HostX64\\x64\\cl.exe", "/c", "/nologo", "/Zi", "/FS", "/Fdbuild\\windows\\x64\\release\\backend\\compile.backend.pdb", "/W3", "/O2", "/fp:fast", "/std:c++20", "/MD", "/IF:\\Code\\vcpkg\\installed\\x64-windows\\include\\crashpad", "/Icommon\\include", "/Iinclude", "/D_CRT_SECURE_NO_WARNINGS", "/DNOMINMAX", "/EHsc", "/IF:\\Code\\vcpkg\\installed\\x64-windows\\include", "/wd4819", "/Fobuild\\.objs\\backend\\windows\\x64\\releasedbg\\common\\src\\jwt.cpp.obj", "common\\src\\jwt.cpp"],
+  "file": "common\\src\\jwt.cpp"
+},
+{
+  "directory": "E:\\Black Desert\\bdo-suit\\backend",
+  "arguments": ["C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.37.32822\\bin\\HostX64\\x64\\cl.exe", "/c", "/nologo", "/Zi", "/FS", "/Fdbuild\\windows\\x64\\release\\backend\\compile.backend.pdb", "/W3", "/O2", "/fp:fast", "/std:c++20", "/MD", "/IF:\\Code\\vcpkg\\installed\\x64-windows\\include\\crashpad", "/Icommon\\include", "/Iinclude", "/D_CRT_SECURE_NO_WARNINGS", "/DNOMINMAX", "/EHsc", "/IF:\\Code\\vcpkg\\installed\\x64-windows\\include", "/wd4819", "/Fobuild\\.objs\\backend\\windows\\x64\\releasedbg\\common\\src\\node_blf.cpp.obj", "common\\src\\node_blf.cpp"],
+  "file": "common\\src\\node_blf.cpp"
+},
+{
+  "directory": "E:\\Black Desert\\bdo-suit\\backend",
+  "arguments": ["C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.37.32822\\bin\\HostX64\\x64\\cl.exe", "/c", "/nologo", "/Zi", "/FS", "/Fdbuild\\windows\\x64\\release\\backend\\compile.backend.pdb", "/W3", "/O2", "/fp:fast", "/std:c++20", "/MD", "/IF:\\Code\\vcpkg\\installed\\x64-windows\\include\\crashpad", "/Icommon\\include", "/Iinclude", "/D_CRT_SECURE_NO_WARNINGS", "/DNOMINMAX", "/EHsc", "/IF:\\Code\\vcpkg\\installed\\x64-windows\\include", "/wd4819", "/Fobuild\\.objs\\backend\\windows\\x64\\releasedbg\\common\\src\\utility.cpp.obj", "common\\src\\utility.cpp"],
+  "file": "common\\src\\utility.cpp"
+},
+{
+  "directory": "E:\\Black Desert\\bdo-suit\\backend",
+  "arguments": ["C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.37.32822\\bin\\HostX64\\x64\\cl.exe", "/c", "/nologo", "/Zi", "/FS", "/Fdbuild\\windows\\x64\\release\\backend\\compile.backend.pdb", "/W3", "/O2", "/fp:fast", "/std:c++20", "/MD", "/IF:\\Code\\vcpkg\\installed\\x64-windows\\include\\crashpad", "/Icommon\\include", "/Iinclude", "/D_CRT_SECURE_NO_WARNINGS", "/DNOMINMAX", "/EHsc", "/IF:\\Code\\vcpkg\\installed\\x64-windows\\include", "/wd4819", "/Fobuild\\.objs\\backend\\windows\\x64\\releasedbg\\src\\items.cpp.obj", "src\\items.cpp"],
+  "file": "src\\items.cpp"
+},
+{
+  "directory": "E:\\Black Desert\\bdo-suit\\backend",
+  "arguments": ["C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.37.32822\\bin\\HostX64\\x64\\cl.exe", "/c", "/nologo", "/Zi", "/FS", "/Fdbuild\\windows\\x64\\release\\backend\\compile.backend.pdb", "/W3", "/O2", "/fp:fast", "/std:c++20", "/MD", "/IF:\\Code\\vcpkg\\installed\\x64-windows\\include\\crashpad", "/Icommon\\include", "/Iinclude", "/D_CRT_SECURE_NO_WARNINGS", "/DNOMINMAX", "/EHsc", "/IF:\\Code\\vcpkg\\installed\\x64-windows\\include", "/wd4819", "/Fobuild\\.objs\\backend\\windows\\x64\\releasedbg\\src\\link.cpp.obj", "src\\link.cpp"],
+  "file": "src\\link.cpp"
+},
+{
+  "directory": "E:\\Black Desert\\bdo-suit\\backend",
+  "arguments": ["C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.37.32822\\bin\\HostX64\\x64\\cl.exe", "/c", "/nologo", "/Zi", "/FS", "/Fdbuild\\windows\\x64\\release\\backend\\compile.backend.pdb", "/W3", "/O2", "/fp:fast", "/std:c++20", "/MD", "/IF:\\Code\\vcpkg\\installed\\x64-windows\\include\\crashpad", "/Icommon\\include", "/Iinclude", "/D_CRT_SECURE_NO_WARNINGS", "/DNOMINMAX", "/EHsc", "/IF:\\Code\\vcpkg\\installed\\x64-windows\\include", "/wd4819", "/Fobuild\\.objs\\backend\\windows\\x64\\releasedbg\\src\\main.cpp.obj", "src\\main.cpp"],
+  "file": "src\\main.cpp"
+},
+{
+  "directory": "E:\\Black Desert\\bdo-suit\\backend",
+  "arguments": ["C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.37.32822\\bin\\HostX64\\x64\\cl.exe", "/c", "/nologo", "/Zi", "/FS", "/Fdbuild\\windows\\x64\\release\\backend\\compile.backend.pdb", "/W3", "/O2", "/fp:fast", "/std:c++20", "/MD", "/IF:\\Code\\vcpkg\\installed\\x64-windows\\include\\crashpad", "/Icommon\\include", "/Iinclude", "/D_CRT_SECURE_NO_WARNINGS", "/DNOMINMAX", "/EHsc", "/IF:\\Code\\vcpkg\\installed\\x64-windows\\include", "/wd4819", "/Fobuild\\.objs\\backend\\windows\\x64\\releasedbg\\src\\mssql.cpp.obj", "src\\mssql.cpp"],
+  "file": "src\\mssql.cpp"
+},
+{
+  "directory": "E:\\Black Desert\\bdo-suit\\backend",
+  "arguments": ["C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.37.32822\\bin\\HostX64\\x64\\cl.exe", "/c", "/nologo", "/Zi", "/FS", "/Fdbuild\\windows\\x64\\release\\backend\\compile.backend.pdb", "/W3", "/O2", "/fp:fast", "/std:c++20", "/MD", "/IF:\\Code\\vcpkg\\installed\\x64-windows\\include\\crashpad", "/Icommon\\include", "/Iinclude", "/D_CRT_SECURE_NO_WARNINGS", "/DNOMINMAX", "/EHsc", "/IF:\\Code\\vcpkg\\installed\\x64-windows\\include", "/wd4819", "/Fobuild\\.objs\\backend\\windows\\x64\\releasedbg\\src\\news.cpp.obj", "src\\news.cpp"],
+  "file": "src\\news.cpp"
+},
+{
+  "directory": "E:\\Black Desert\\bdo-suit\\backend",
+  "arguments": ["C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.37.32822\\bin\\HostX64\\x64\\cl.exe", "/c", "/nologo", "/Zi", "/FS", "/Fdbuild\\windows\\x64\\release\\backend\\compile.backend.pdb", "/W3", "/O2", "/fp:fast", "/std:c++20", "/MD", "/IF:\\Code\\vcpkg\\installed\\x64-windows\\include\\crashpad", "/Icommon\\include", "/Iinclude", "/D_CRT_SECURE_NO_WARNINGS", "/DNOMINMAX", "/EHsc", "/IF:\\Code\\vcpkg\\installed\\x64-windows\\include", "/wd4819", "/Fobuild\\.objs\\backend\\windows\\x64\\releasedbg\\src\\slide.cpp.obj", "src\\slide.cpp"],
+  "file": "src\\slide.cpp"
+},
+{
+  "directory": "E:\\Black Desert\\bdo-suit\\backend",
+  "arguments": ["C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.37.32822\\bin\\HostX64\\x64\\cl.exe", "/c", "/nologo", "/Zi", "/FS", "/Fdbuild\\windows\\x64\\release\\backend\\compile.backend.pdb", "/W3", "/O2", "/fp:fast", "/std:c++20", "/MD", "/IF:\\Code\\vcpkg\\installed\\x64-windows\\include\\crashpad", "/Icommon\\include", "/Iinclude", "/D_CRT_SECURE_NO_WARNINGS", "/DNOMINMAX", "/EHsc", "/IF:\\Code\\vcpkg\\installed\\x64-windows\\include", "/wd4819", "/Fobuild\\.objs\\backend\\windows\\x64\\releasedbg\\src\\status.cpp.obj", "src\\status.cpp"],
+  "file": "src\\status.cpp"
+},
+{
+  "directory": "E:\\Black Desert\\bdo-suit\\backend",
+  "arguments": ["C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.37.32822\\bin\\HostX64\\x64\\cl.exe", "/c", "/nologo", "/Zi", "/FS", "/Fdbuild\\windows\\x64\\release\\backend\\compile.backend.pdb", "/W3", "/O2", "/fp:fast", "/std:c++20", "/MD", "/IF:\\Code\\vcpkg\\installed\\x64-windows\\include\\crashpad", "/Icommon\\include", "/Iinclude", "/D_CRT_SECURE_NO_WARNINGS", "/DNOMINMAX", "/EHsc", "/IF:\\Code\\vcpkg\\installed\\x64-windows\\include", "/wd4819", "/Fobuild\\.objs\\backend\\windows\\x64\\releasedbg\\src\\stdafx.cpp.obj", "src\\stdafx.cpp"],
+  "file": "src\\stdafx.cpp"
+},
+{
+  "directory": "E:\\Black Desert\\bdo-suit\\backend",
+  "arguments": ["C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.37.32822\\bin\\HostX64\\x64\\cl.exe", "/c", "/nologo", "/Zi", "/FS", "/Fdbuild\\windows\\x64\\release\\backend\\compile.backend.pdb", "/W3", "/O2", "/fp:fast", "/std:c++20", "/MD", "/IF:\\Code\\vcpkg\\installed\\x64-windows\\include\\crashpad", "/Icommon\\include", "/Iinclude", "/D_CRT_SECURE_NO_WARNINGS", "/DNOMINMAX", "/EHsc", "/IF:\\Code\\vcpkg\\installed\\x64-windows\\include", "/wd4819", "/Fobuild\\.objs\\backend\\windows\\x64\\releasedbg\\src\\user.cpp.obj", "src\\user.cpp"],
+  "file": "src\\user.cpp"
+},
+{
+  "directory": "E:\\Black Desert\\bdo-suit\\backend",
+  "arguments": ["C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.37.32822\\bin\\HostX64\\x64\\cl.exe", "/c", "/nologo", "/Zi", "/FS", "/Fdbuild\\windows\\x64\\release\\backend\\compile.backend.pdb", "/W3", "/O2", "/fp:fast", "/std:c++20", "/MD", "/IF:\\Code\\vcpkg\\installed\\x64-windows\\include\\crashpad", "/Icommon\\include", "/Iinclude", "/D_CRT_SECURE_NO_WARNINGS", "/DNOMINMAX", "/EHsc", "/IF:\\Code\\vcpkg\\installed\\x64-windows\\include", "/wd4819", "/Fobuild\\.objs\\backend\\windows\\x64\\releasedbg\\src\\version.cpp.obj", "src\\version.cpp"],
+  "file": "src\\version.cpp"
+}]
