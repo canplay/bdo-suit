@@ -12,7 +12,7 @@ else
     add_requires("vcpkg::fmt", "vcpkg::spdlog", "vcpkg::nanodbc", "vcpkg::cryptopp", "vcpkg::libuuid", "vcpkg::drogon[core,orm,mysql,postgres,sqlite3,redis]", "vcpkg::trantor", "vcpkg::openssl", "vcpkg::tinyxml2", "vcpkg::jsoncpp", "vcpkg::zlib", "vcpkg::brotli", "vcpkg::jwt-cpp", "vcpkg::bshoshany-thread-pool", "vcpkg::icu", "vcpkg::libmariadb[core,schannel,ssl]", "vcpkg::libpq[core,lz4,openssl,zlib]", "vcpkg::lz4", "vcpkg::picojson", "vcpkg::sqlite3[core,json1]", "vcpkg::hiredis", "vcpkg::c-ares")
 end
 
-add_defines("_CRT_SECURE_NO_WARNINGS", "NOMINMAX")
+add_defines("_CRT_SECURE_NO_WARNINGS", "NOMINMAX", "NANODBC_USE_UNICODE")
 
 local path_fix = ""
 if is_mode("debug") then

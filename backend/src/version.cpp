@@ -15,9 +15,9 @@ void Version::count(
   try {
     Json::Value info;
 
-    auto r = MsSql::exec(stmt);
+    auto r = MsSql::exec(utf8ToGBK(stmt));
     r.next();
-    ret["msg"] = r.get<INT64>(0, 0);
+    ret["msg"] = r.get<int64_t>(0, 0);
     ret["status"] = 1;
   } catch (const std::exception &e) {
     spdlog::warn("version count error: {}", e.what());
@@ -88,7 +88,7 @@ void Version::add(const HttpRequestPtr &req,
           (*json)["update_user"].asString(), (*json)["oldPath"].asString(),
           (*json)["newPath"].asString(), (*json)["savePath"].asString());
 
-      auto r = MsSql::exec(stmt);
+      auto r = MsSql::exec(utf8ToGBK(stmt));
 
       if (r.affected_rows() >= 1) {
         if (hdiff_r.find("patch check diff data ok") != std::string::npos) {
@@ -147,7 +147,7 @@ void Version::update(
   Json::Value ret;
 
   try {
-    auto r = MsSql::exec(stmt);
+    auto r = MsSql::exec(utf8ToGBK(stmt));
 
     if (r.affected_rows() >= 1) {
       ret["msg"] = "ok";
@@ -200,20 +200,20 @@ void Version::info(
   try {
     Json::Value infos;
 
-    auto r = MsSql::exec(stmt);
+    auto r = MsSql::exec(utf8ToGBK(stmt));
 
     while (r.next()) {
       Json::Value info;
       info["id"] = r.get<std::string>("id", "");
       info["name"] = r.get<std::string>("name", "");
       info["version"] = r.get<std::string>("version", "");
-      info["force"] = r.get<INT64>("force", 0);
+      info["force"] = r.get<int64_t>("force", 0);
       info["link"] = r.get<std::string>("link", "");
       info["create_date"] = r.get<std::string>("create_date", "");
       info["create_user"] = r.get<std::string>("create_user", "");
       info["update_date"] = r.get<std::string>("update_date", "");
       info["update_user"] = r.get<std::string>("update_user", "");
-      info["delete"] = r.get<INT64>("delete", 0);
+      info["delete"] = r.get<int64_t>("delete", 0);
       info["oldPath"] = r.get<std::string>("oldPath", "");
       info["newPath"] = r.get<std::string>("newPath", "");
       info["savePath"] = r.get<std::string>("savePath", "");
@@ -244,13 +244,13 @@ void Version::latest(
         "WHERE id NOT IN(SELECT TOP 0 id "
         "FROM[SA_BETA_WORLDDB_0002].[PaWebPublic].[version] ORDER BY[version] "
         "DESC) AND [name] = 'app' AND [delete] = 0 ORDER BY [version] DESC");
-    auto r = MsSql::exec(stmt);
+    auto r = MsSql::exec(utf8ToGBK(stmt));
     r.next();
     Json::Value app;
     app["id"] = r.get<std::string>("id", "");
     app["name"] = r.get<std::string>("name", "");
     app["version"] = r.get<std::string>("version", "");
-    app["force"] = r.get<INT64>("force", 0);
+    app["force"] = r.get<int64_t>("force", 0);
     app["link"] = r.get<std::string>("link", "");
     infos.append(app);
 
@@ -260,13 +260,13 @@ void Version::latest(
         "FROM[SA_BETA_WORLDDB_0002].[PaWebPublic].[version] ORDER BY[version] "
         "DESC) AND [name] = 'resource' AND [delete] = 0 ORDER BY [version] "
         "DESC");
-    r = MsSql::exec(stmt);
+    r = MsSql::exec(utf8ToGBK(stmt));
     r.next();
     Json::Value res;
     res["id"] = r.get<std::string>("id", "");
     res["name"] = r.get<std::string>("name", "");
     res["version"] = r.get<std::string>("version", "");
-    res["force"] = r.get<INT64>("force", 0);
+    res["force"] = r.get<int64_t>("force", 0);
     res["link"] = r.get<std::string>("link", "");
     infos.append(res);
 

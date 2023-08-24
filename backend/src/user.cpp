@@ -31,9 +31,9 @@ void User::count(
   try {
     Json::Value info;
 
-    auto r = MsSql::exec(stmt);
+    auto r = MsSql::exec(utf8ToGBK(stmt));
     r.next();
-    ret["msg"] = r.get<INT64>(0, 0);
+    ret["msg"] = r.get<int64_t>(0, 0);
     ret["status"] = 1;
     callback(HttpResponse::newHttpJsonResponse(ret));
   } catch (const std::exception &e) {
@@ -69,7 +69,7 @@ void User::signup(
   try {
     Json::Value info;
 
-    auto r = MsSql::exec(stmt);
+    auto r = MsSql::exec(utf8ToGBK(stmt));
     r.next();
 
     if (r.rows() != 0) {
@@ -127,14 +127,14 @@ void User::signup(
 
           info["registerDate"] = r2.get<std::string>("_registerDate", "");
           info["valid"] = r2.get<std::string>("_isValid", "");
-          info["userNo"] = r2.get<INT64>("_userNo", 0);
+          info["userNo"] = r2.get<int64_t>("_userNo", 0);
           info["userId"] = r2.get<std::string>("_userId", "");
           info["userNickname"] = r2.get<std::string>("_userNickname", "");
           info["lastLoginTime"] = r2.get<std::string>("_lastLoginTime", "");
           info["lastLogoutTime"] = r2.get<std::string>("_lastLogoutTime", "");
-          info["totalPlayTime"] = r2.get<INT64>("_totalPlayTime", 0);
-          info["membershipType"] = r2.get<INT64>("_membershipType", 0);
-          info["pcroom"] = r2.get<INT64>("_isPcRoom", 0);
+          info["totalPlayTime"] = r2.get<int64_t>("_totalPlayTime", 0);
+          info["membershipType"] = r2.get<int64_t>("_membershipType", 0);
+          info["pcroom"] = r2.get<int64_t>("_isPcRoom", 0);
 
           jwt jwtGenerated = jwt::generateToken(
               {
@@ -194,68 +194,69 @@ void User::signin(
   try {
     Json::Value info;
 
-    auto r = MsSql::exec(stmt);
+    auto r = MsSql::exec(utf8ToGBK(stmt));
     r.next();
 
     if (r.rows() != 0) {
       Json::Value info;
 
-      auto r = MsSql::exec(stmt);
+      auto r = MsSql::exec(utf8ToGBK(stmt));
       r.next();
       info["registerDate"] = r.get<std::string>("_registerDate", "");
       info["valid"] = r.get<std::string>("_isValid", "");
-      info["userNo"] = r.get<INT64>("_userNo", 0);
+      info["userNo"] = r.get<int64_t>("_userNo", 0);
       info["userId"] = r.get<std::string>("_userId", "");
       info["userNickname"] = r.get<std::string>("_userNickname", "");
       info["lastLoginTime"] = r.get<std::string>("_lastLoginTime", "");
       info["lastLogoutTime"] = r.get<std::string>("_lastLogoutTime", "");
-      info["totalPlayTime"] = r.get<INT64>("_totalPlayTime", 0);
-      info["membershipType"] = r.get<INT64>("_membershipType", 0);
-      info["pcroom"] = r.get<INT64>("_isPcRoom", 0);
+      info["totalPlayTime"] = r.get<int64_t>("_totalPlayTime", 0);
+      info["membershipType"] = r.get<int64_t>("_membershipType", 0);
+      info["pcroom"] = r.get<int64_t>("_isPcRoom", 0);
       info["permission"] =
-          getPermission(std::to_string(r.get<INT64>("_userNo", 0)));
+          getPermission(std::to_string(r.get<int64_t>("_userNo", 0)));
 
       Json::Value characters;
       auto stmt1 = fmt::format("SELECT * FROM "
                                "[SA_BETA_GAMEDB_0002].[PaGamePrivate].["
                                "TblCharacterInformation] WHERE [_userNo] = {}",
-                               r.get<INT64>("_userNo", 0));
+                               r.get<int64_t>("_userNo", 0));
       auto r1 = MsSql::exec(stmt1);
       while (r1.next()) {
         Json::Value character;
         character["deletedDate"] = r1.get<std::string>("_deletedDate", "");
-        character["characterNo"] = r1.get<INT64>("_characterNo", 0);
+        character["characterNo"] = r1.get<int64_t>("_characterNo", 0);
         character["characterName"] = r1.get<std::string>("_characterName", "");
-        character["classType"] = r1.get<INT64>("_classType", 0);
-        character["totalPlayTime"] = r1.get<INT64>("_totalPlayTime", 0);
-        character["currentPositionX"] = r1.get<INT64>("_currentPositionX", 0);
-        character["currentPositionY"] = r1.get<INT64>("_currentPositionY", 0);
-        character["currentPositionZ"] = r1.get<INT64>("_currentPositionZ", 0);
-        character["returnPositionX"] = r1.get<INT64>("_returnPositionX", 0);
-        character["returnPositionY"] = r1.get<INT64>("_returnPositionY", 0);
-        character["returnPositionZ"] = r1.get<INT64>("_returnPositionZ", 0);
-        character["level"] = r1.get<INT64>("_level", 0);
-        character["experience"] = r1.get<INT64>("_experience", 0);
-        character["variedWeight"] = r1.get<INT64>("_variedWeight", 0);
-        character["skillPointLevel"] = r1.get<INT64>("_skillPointLevel", 0);
+        character["classType"] = r1.get<int64_t>("_classType", 0);
+        character["totalPlayTime"] = r1.get<int64_t>("_totalPlayTime", 0);
+        character["currentPositionX"] = r1.get<int64_t>("_currentPositionX", 0);
+        character["currentPositionY"] = r1.get<int64_t>("_currentPositionY", 0);
+        character["currentPositionZ"] = r1.get<int64_t>("_currentPositionZ", 0);
+        character["returnPositionX"] = r1.get<int64_t>("_returnPositionX", 0);
+        character["returnPositionY"] = r1.get<int64_t>("_returnPositionY", 0);
+        character["returnPositionZ"] = r1.get<int64_t>("_returnPositionZ", 0);
+        character["level"] = r1.get<int64_t>("_level", 0);
+        character["experience"] = r1.get<int64_t>("_experience", 0);
+        character["variedWeight"] = r1.get<int64_t>("_variedWeight", 0);
+        character["skillPointLevel"] = r1.get<int64_t>("_skillPointLevel", 0);
         character["skillPointExperience"] =
-            r1.get<INT64>("_skillPointExperience", 0);
+            r1.get<int64_t>("_skillPointExperience", 0);
         character["remainedSkillPoint"] =
-            r1.get<INT64>("_remainedSkillPoint", 0);
-        character["aquiredSkillPoint"] = r1.get<INT64>("_aquiredSkillPoint", 0);
-        character["tendency"] = r1.get<INT64>("_tendency", 0);
-        character["hp"] = r1.get<INT64>("_hp", 0);
-        character["mp"] = r1.get<INT64>("_mp", 0);
-        character["sp"] = r1.get<INT64>("_sp", 0);
-        character["wp"] = r1.get<INT64>("_wp", 0);
+            r1.get<int64_t>("_remainedSkillPoint", 0);
+        character["aquiredSkillPoint"] =
+            r1.get<int64_t>("_aquiredSkillPoint", 0);
+        character["tendency"] = r1.get<int64_t>("_tendency", 0);
+        character["hp"] = r1.get<int64_t>("_hp", 0);
+        character["mp"] = r1.get<int64_t>("_mp", 0);
+        character["sp"] = r1.get<int64_t>("_sp", 0);
+        character["wp"] = r1.get<int64_t>("_wp", 0);
         character["inventorySlotCount"] =
-            r1.get<INT64>("_inventorySlotCount", 0);
-        character["titleKey"] = r1.get<INT64>("_titleKey", 0);
-        character["killRewardCount"] = r1.get<INT64>("_killRewardCount", 0);
-        character["enchantFailCount"] = r1.get<INT64>("_enchantFailCount", 0);
-        character["offenceValue"] = r1.get<INT64>("_offenceValue", 0);
-        character["defenceValue"] = r1.get<INT64>("_defenceValue", 0);
-        character["awakenValue"] = r1.get<INT64>("_awakenValue", 0);
+            r1.get<int64_t>("_inventorySlotCount", 0);
+        character["titleKey"] = r1.get<int64_t>("_titleKey", 0);
+        character["killRewardCount"] = r1.get<int64_t>("_killRewardCount", 0);
+        character["enchantFailCount"] = r1.get<int64_t>("_enchantFailCount", 0);
+        character["offenceValue"] = r1.get<int64_t>("_offenceValue", 0);
+        character["defenceValue"] = r1.get<int64_t>("_defenceValue", 0);
+        character["awakenValue"] = r1.get<int64_t>("_awakenValue", 0);
         characters.append(character);
       }
       info["characters"] = characters;
@@ -339,65 +340,66 @@ void User::info(const HttpRequestPtr &req,
   try {
     Json::Value infos;
 
-    auto r = MsSql::exec(stmt);
+    auto r = MsSql::exec(utf8ToGBK(stmt));
 
     while (r.next()) {
       Json::Value info;
       info["registerDate"] = r.get<std::string>("_registerDate", "");
       info["valid"] = r.get<std::string>("_isValid", "");
-      info["userNo"] = r.get<INT64>("_userNo", 0);
+      info["userNo"] = r.get<int64_t>("_userNo", 0);
       info["userId"] = r.get<std::string>("_userId", "");
       info["userNickname"] = r.get<std::string>("_userNickname", "");
       info["lastLoginTime"] = r.get<std::string>("_lastLoginTime", "");
       info["lastLogoutTime"] = r.get<std::string>("_lastLogoutTime", "");
-      info["totalPlayTime"] = r.get<INT64>("_totalPlayTime", 0);
-      info["membershipType"] = r.get<INT64>("_membershipType", 0);
-      info["pcroom"] = r.get<INT64>("_isPcRoom", 0);
+      info["totalPlayTime"] = r.get<int64_t>("_totalPlayTime", 0);
+      info["membershipType"] = r.get<int64_t>("_membershipType", 0);
+      info["pcroom"] = r.get<int64_t>("_isPcRoom", 0);
       info["permission"] =
-          getPermission(std::to_string(r.get<INT64>("_userNo", 0)));
+          getPermission(std::to_string(r.get<int64_t>("_userNo", 0)));
 
       Json::Value characters;
       auto stmt1 = fmt::format("SELECT * FROM "
                                "[SA_BETA_GAMEDB_0002].[PaGamePrivate].["
                                "TblCharacterInformation] WHERE [_userNo] = {}",
-                               r.get<INT64>("_userNo", 0));
+                               r.get<int64_t>("_userNo", 0));
       auto r1 = MsSql::exec(stmt1);
       spdlog::info(stmt1);
       while (r1.next()) {
         Json::Value character;
         character["deletedDate"] = r1.get<std::string>("_deletedDate", "");
-        character["characterNo"] = r1.get<INT64>("_characterNo", 0);
+        character["characterNo"] = r1.get<int64_t>("_characterNo", 0);
         character["characterName"] = r1.get<std::string>("_characterName", "");
-        character["classType"] = r1.get<INT64>("_classType", 0);
-        character["totalPlayTime"] = r1.get<INT64>("_totalPlayTime", 0);
-        character["currentPositionX"] = r1.get<INT64>("_currentPositionX", 0);
-        character["currentPositionY"] = r1.get<INT64>("_currentPositionY", 0);
-        character["currentPositionZ"] = r1.get<INT64>("_currentPositionZ", 0);
-        character["returnPositionX"] = r1.get<INT64>("_returnPositionX", 0);
-        character["returnPositionY"] = r1.get<INT64>("_returnPositionY", 0);
-        character["returnPositionZ"] = r1.get<INT64>("_returnPositionZ", 0);
-        character["level"] = r1.get<INT64>("_level", 0);
-        character["experience"] = r1.get<INT64>("_experience", 0);
-        character["variedWeight"] = r1.get<INT64>("_variedWeight", 0);
-        character["skillPointLevel"] = r1.get<INT64>("_skillPointLevel", 0);
+        character["classType"] = r1.get<int64_t>("_classType", 0);
+        character["totalPlayTime"] = r1.get<int64_t>("_totalPlayTime", 0);
+        character["currentPositionX"] = r1.get<int64_t>("_currentPositionX", 0);
+        character["currentPositionY"] = r1.get<int64_t>("_currentPositionY", 0);
+        character["currentPositionZ"] = r1.get<int64_t>("_currentPositionZ", 0);
+        character["returnPositionX"] = r1.get<int64_t>("_returnPositionX", 0);
+        character["returnPositionY"] = r1.get<int64_t>("_returnPositionY", 0);
+        character["returnPositionZ"] = r1.get<int64_t>("_returnPositionZ", 0);
+        character["level"] = r1.get<int64_t>("_level", 0);
+        character["experience"] = r1.get<int64_t>("_experience", 0);
+        character["variedWeight"] = r1.get<int64_t>("_variedWeight", 0);
+        character["skillPointLevel"] = r1.get<int64_t>("_skillPointLevel", 0);
         character["skillPointExperience"] =
-            r1.get<INT64>("_skillPointExperience", 0);
+            r1.get<int64_t>("_skillPointExperience", 0);
         character["remainedSkillPoint"] =
-            r1.get<INT64>("_remainedSkillPoint", 0);
-        character["aquiredSkillPoint"] = r1.get<INT64>("_aquiredSkillPoint", 0);
-        character["tendency"] = r1.get<INT64>("_tendency", 0);
-        character["hp"] = r1.get<INT64>("_hp", 0);
-        character["mp"] = r1.get<INT64>("_mp", 0);
-        character["sp"] = r1.get<INT64>("_sp", 0);
-        character["wp"] = r1.get<INT64>("_wp", 0);
+            r1.get<int64_t>("_remainedSkillPoint", 0);
+        character["aquiredSkillPoint"] =
+            r1.get<int64_t>("_aquiredSkillPoint", 0);
+        character["tendency"] = r1.get<int64_t>("_tendency", 0);
+        character["hp"] = r1.get<int64_t>("_hp", 0);
+        character["mp"] = r1.get<int64_t>("_mp", 0);
+        character["sp"] = r1.get<int64_t>("_sp", 0);
+        character["wp"] = r1.get<int64_t>("_wp", 0);
         character["inventorySlotCount"] =
-            r1.get<INT64>("_inventorySlotCount", 0);
-        character["titleKey"] = r1.get<INT64>("_titleKey", 0);
-        character["killRewardCount"] = r1.get<INT64>("_killRewardCount", 0);
-        character["enchantFailCount"] = r1.get<INT64>("_enchantFailCount", 0);
-        character["offenceValue"] = r1.get<INT64>("_offenceValue", 0);
-        character["defenceValue"] = r1.get<INT64>("_defenceValue", 0);
-        character["awakenValue"] = r1.get<INT64>("_awakenValue", 0);
+            r1.get<int64_t>("_inventorySlotCount", 0);
+        character["titleKey"] = r1.get<int64_t>("_titleKey", 0);
+        character["killRewardCount"] = r1.get<int64_t>("_killRewardCount", 0);
+        character["enchantFailCount"] = r1.get<int64_t>("_enchantFailCount", 0);
+        character["offenceValue"] = r1.get<int64_t>("_offenceValue", 0);
+        character["defenceValue"] = r1.get<int64_t>("_defenceValue", 0);
+        character["awakenValue"] = r1.get<int64_t>("_awakenValue", 0);
         characters.append(character);
       }
 
@@ -429,60 +431,62 @@ void User::infoOne(const HttpRequestPtr &req,
   try {
     Json::Value info;
 
-    auto r = MsSql::exec(stmt);
+    auto r = MsSql::exec(utf8ToGBK(stmt));
     r.next();
     info["registerDate"] = r.get<std::string>("_registerDate", "");
     info["valid"] = r.get<std::string>("_isValid", "");
-    info["userNo"] = r.get<INT64>("_userNo", 0);
+    info["userNo"] = r.get<int64_t>("_userNo", 0);
     info["userId"] = r.get<std::string>("_userId", "");
     info["userNickname"] = r.get<std::string>("_userNickname", "");
     info["lastLoginTime"] = r.get<std::string>("_lastLoginTime", "");
     info["lastLogoutTime"] = r.get<std::string>("_lastLogoutTime", "");
-    info["totalPlayTime"] = r.get<INT64>("_totalPlayTime", 0);
-    info["membershipType"] = r.get<INT64>("_membershipType", 0);
-    info["pcroom"] = r.get<INT64>("_isPcRoom", 0);
+    info["totalPlayTime"] = r.get<int64_t>("_totalPlayTime", 0);
+    info["membershipType"] = r.get<int64_t>("_membershipType", 0);
+    info["pcroom"] = r.get<int64_t>("_isPcRoom", 0);
     info["permission"] =
-        getPermission(std::to_string(r.get<INT64>("_userNo", 0)));
+        getPermission(std::to_string(r.get<int64_t>("_userNo", 0)));
 
     Json::Value characters;
     auto stmt1 = fmt::format("SELECT * FROM "
                              "[SA_BETA_GAMEDB_0002].[PaGamePrivate].["
                              "TblCharacterInformation] WHERE [_userNo] = {}",
-                             r.get<INT64>("_userNo", 0));
+                             r.get<int64_t>("_userNo", 0));
     auto r1 = MsSql::exec(stmt1);
     while (r1.next()) {
       Json::Value character;
       character["deletedDate"] = r1.get<std::string>("_deletedDate", "");
-      character["characterNo"] = r1.get<INT64>("_characterNo", 0);
+      character["characterNo"] = r1.get<int64_t>("_characterNo", 0);
       character["characterName"] = r1.get<std::string>("_characterName", "");
-      character["classType"] = r1.get<INT64>("_classType", 0);
-      character["totalPlayTime"] = r1.get<INT64>("_totalPlayTime", 0);
-      character["currentPositionX"] = r1.get<INT64>("_currentPositionX", 0);
-      character["currentPositionY"] = r1.get<INT64>("_currentPositionY", 0);
-      character["currentPositionZ"] = r1.get<INT64>("_currentPositionZ", 0);
-      character["returnPositionX"] = r1.get<INT64>("_returnPositionX", 0);
-      character["returnPositionY"] = r1.get<INT64>("_returnPositionY", 0);
-      character["returnPositionZ"] = r1.get<INT64>("_returnPositionZ", 0);
-      character["level"] = r1.get<INT64>("_level", 0);
-      character["experience"] = r1.get<INT64>("_experience", 0);
-      character["variedWeight"] = r1.get<INT64>("_variedWeight", 0);
-      character["skillPointLevel"] = r1.get<INT64>("_skillPointLevel", 0);
+      character["classType"] = r1.get<int64_t>("_classType", 0);
+      character["totalPlayTime"] = r1.get<int64_t>("_totalPlayTime", 0);
+      character["currentPositionX"] = r1.get<int64_t>("_currentPositionX", 0);
+      character["currentPositionY"] = r1.get<int64_t>("_currentPositionY", 0);
+      character["currentPositionZ"] = r1.get<int64_t>("_currentPositionZ", 0);
+      character["returnPositionX"] = r1.get<int64_t>("_returnPositionX", 0);
+      character["returnPositionY"] = r1.get<int64_t>("_returnPositionY", 0);
+      character["returnPositionZ"] = r1.get<int64_t>("_returnPositionZ", 0);
+      character["level"] = r1.get<int64_t>("_level", 0);
+      character["experience"] = r1.get<int64_t>("_experience", 0);
+      character["variedWeight"] = r1.get<int64_t>("_variedWeight", 0);
+      character["skillPointLevel"] = r1.get<int64_t>("_skillPointLevel", 0);
       character["skillPointExperience"] =
-          r1.get<INT64>("_skillPointExperience", 0);
-      character["remainedSkillPoint"] = r1.get<INT64>("_remainedSkillPoint", 0);
-      character["aquiredSkillPoint"] = r1.get<INT64>("_aquiredSkillPoint", 0);
-      character["tendency"] = r1.get<INT64>("_tendency", 0);
-      character["hp"] = r1.get<INT64>("_hp", 0);
-      character["mp"] = r1.get<INT64>("_mp", 0);
-      character["sp"] = r1.get<INT64>("_sp", 0);
-      character["wp"] = r1.get<INT64>("_wp", 0);
-      character["inventorySlotCount"] = r1.get<INT64>("_inventorySlotCount", 0);
-      character["titleKey"] = r1.get<INT64>("_titleKey", 0);
-      character["killRewardCount"] = r1.get<INT64>("_killRewardCount", 0);
-      character["enchantFailCount"] = r1.get<INT64>("_enchantFailCount", 0);
-      character["offenceValue"] = r1.get<INT64>("_offenceValue", 0);
-      character["defenceValue"] = r1.get<INT64>("_defenceValue", 0);
-      character["awakenValue"] = r1.get<INT64>("_awakenValue", 0);
+          r1.get<int64_t>("_skillPointExperience", 0);
+      character["remainedSkillPoint"] =
+          r1.get<int64_t>("_remainedSkillPoint", 0);
+      character["aquiredSkillPoint"] = r1.get<int64_t>("_aquiredSkillPoint", 0);
+      character["tendency"] = r1.get<int64_t>("_tendency", 0);
+      character["hp"] = r1.get<int64_t>("_hp", 0);
+      character["mp"] = r1.get<int64_t>("_mp", 0);
+      character["sp"] = r1.get<int64_t>("_sp", 0);
+      character["wp"] = r1.get<int64_t>("_wp", 0);
+      character["inventorySlotCount"] =
+          r1.get<int64_t>("_inventorySlotCount", 0);
+      character["titleKey"] = r1.get<int64_t>("_titleKey", 0);
+      character["killRewardCount"] = r1.get<int64_t>("_killRewardCount", 0);
+      character["enchantFailCount"] = r1.get<int64_t>("_enchantFailCount", 0);
+      character["offenceValue"] = r1.get<int64_t>("_offenceValue", 0);
+      character["defenceValue"] = r1.get<int64_t>("_defenceValue", 0);
+      character["awakenValue"] = r1.get<int64_t>("_awakenValue", 0);
       characters.append(character);
     }
     info["characters"] = characters;
@@ -542,7 +546,7 @@ void User::mail(const HttpRequestPtr &req,
   }
 
   try {
-    auto r = MsSql::exec(stmt);
+    auto r = MsSql::exec(utf8ToGBK(stmt));
 
     if (r.affected_rows() >= 1) {
       ret["msg"] = "ok";
@@ -574,10 +578,11 @@ void User::update(const HttpRequestPtr &req,
 
   Json::Value ret;
 
-  if ((*json)["username"].asString() == "" ||
-      (*json)["username"].asString() == "" ||
-      (*json)["username"].asString() == "") {
-    ret["msg"] = "username or password or familyname is null";
+  if (type != "map" && type != "knowledge" &&
+      ((*json)["username"].asString() == "" ||
+       (*json)["password"].asString() == "" ||
+       (*json)["familyname"].asString() == "")) {
+    ret["msg"] = "用户名, 密码或家族名不能为空";
     ret["status"] = 0;
     return callback(HttpResponse::newHttpJsonResponse(ret));
   }
@@ -594,11 +599,11 @@ void User::update(const HttpRequestPtr &req,
 
     Json::Value ret;
 
-    auto r = MsSql::exec(stmt);
+    auto r = MsSql::exec(utf8ToGBK(stmt));
     r.next();
 
     if (r.rows() > 1) {
-      ret["msg"] = "username already exist";
+      ret["msg"] = "用户名已存在";
       ret["status"] = 0;
       return callback(HttpResponse::newHttpJsonResponse(ret));
     }
@@ -626,7 +631,7 @@ void User::update(const HttpRequestPtr &req,
       auto r3 = MsSql::exec(stmt3);
       r3.next();
 
-      if (r3.get<INT64>(0, 0) > 0) {
+      if (r3.get<int64_t>(0, 0) > 0) {
         auto r1 = MsSql::exec(stmt1);
 
         if (r1.affected_rows() >= 1) {
@@ -684,7 +689,7 @@ void User::update(const HttpRequestPtr &req,
             (*json)["userNo"].asInt64(), i, timestamp,
             (*json)["userNo"].asInt64(), i);
 
-        MsSql::exec(stmt);
+        MsSql::exec(utf8ToGBK(stmt));
       }
 
       co_return;
@@ -710,7 +715,7 @@ void User::update(const HttpRequestPtr &req,
             (*json)["userNo"].asInt64(), i, timestamp,
             (*json)["userNo"].asInt64(), i, (*json)["userNo"].asInt64(), i);
 
-        MsSql::exec(stmt);
+        MsSql::exec(utf8ToGBK(stmt));
       }
 
       co_return;
@@ -746,14 +751,14 @@ void User::characterUpdate(
                   (*json)["characterNameOld"].asString());
 
   try {
-    auto r = MsSql::exec(stmt);
+    auto r = MsSql::exec(utf8ToGBK(stmt));
     r.next();
 
     auto now = std::chrono::system_clock::now();
     time_t time = std::chrono::system_clock::to_time_t(now);
     auto timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(time));
 
-    if (r.get<INT64>(0, 0) != 0) {
+    if (r.get<int64_t>(0, 0) != 0) {
       stmt = fmt::format(
           "UPDATE "
           "[SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblCharacterInformation] SET "
@@ -786,7 +791,7 @@ void User::characterUpdate(
                       (*json)["characterNo"].asInt64());
     }
 
-    r = MsSql::exec(stmt);
+    r = MsSql::exec(utf8ToGBK(stmt));
 
     if (r.affected_rows() >= 1) {
       if ((*json)["deletedDate"].asString() != "") {
@@ -794,7 +799,7 @@ void User::characterUpdate(
                            "[SA_BETA_GAMEDB_0002].[PaGamePrivate].["
                            "TblCharacterInformation] SET [_deletedDate] = '{}'",
                            timestamp);
-        r = MsSql::exec(stmt);
+        r = MsSql::exec(utf8ToGBK(stmt));
       }
 
       ret["msg"] = "ok";
@@ -855,7 +860,7 @@ void User::adminUpdate(
     auto r3 = MsSql::exec(stmt3);
     r3.next();
 
-    if (r3.get<INT64>(0, 0) > 0) {
+    if (r3.get<int64_t>(0, 0) > 0) {
       auto r1 = MsSql::exec(stmt1);
 
       if (r1.affected_rows() >= 1) {
@@ -943,7 +948,7 @@ void User::adminCharacterUpdate(
   Json::Value ret;
 
   try {
-    auto r = MsSql::exec(stmt);
+    auto r = MsSql::exec(utf8ToGBK(stmt));
 
     if (r.affected_rows() >= 1) {
       if (!(*json)["deletedDate"].asString().empty()) {
@@ -951,7 +956,7 @@ void User::adminCharacterUpdate(
                            "[SA_BETA_GAMEDB_0002].[PaGamePrivate].["
                            "TblCharacterInformation] SET [_deletedDate] = '{}'",
                            timestamp);
-        r = MsSql::exec(stmt);
+        r = MsSql::exec(utf8ToGBK(stmt));
       }
 
       ret["msg"] = "ok";
@@ -1015,7 +1020,7 @@ void User::adminMail(
   Json::Value ret;
 
   try {
-    auto r = MsSql::exec(stmt);
+    auto r = MsSql::exec(utf8ToGBK(stmt));
 
     if (r.affected_rows() >= 1) {
       ret["msg"] = "ok";
@@ -1049,11 +1054,11 @@ void User::adminGmCount(const HttpRequestPtr &req,
   }
 
   try {
-    auto r = MsSql::exec(stmt);
+    auto r = MsSql::exec(utf8ToGBK(stmt));
     r.next();
 
     if (r.rows() > 0) {
-      ret["msg"] = r.get<INT64>(0, 0);
+      ret["msg"] = r.get<int64_t>(0, 0);
       ret["status"] = 1;
       callback(HttpResponse::newHttpJsonResponse(ret));
     } else {
@@ -1102,7 +1107,7 @@ void User::adminGmInfo(const HttpRequestPtr &req,
       stmt = fmt::format("{})", stmt);
 
     try {
-      auto r = MsSql::exec(stmt);
+      auto r = MsSql::exec(utf8ToGBK(stmt));
 
       Json::Value infos;
 
@@ -1145,7 +1150,7 @@ void User::adminGmInfo(const HttpRequestPtr &req,
       stmt = fmt::format("{})", stmt);
 
     try {
-      auto r = MsSql::exec(stmt);
+      auto r = MsSql::exec(utf8ToGBK(stmt));
 
       Json::Value infos;
 
@@ -1216,7 +1221,7 @@ void User::adminGmUpdate(
     }
 
     try {
-      auto r = MsSql::exec(stmt);
+      auto r = MsSql::exec(utf8ToGBK(stmt));
 
       if (r.affected_rows() >= 1) {
         ret["msg"] = "ok";
@@ -1248,7 +1253,7 @@ void User::adminGmUpdate(
     }
 
     try {
-      auto r = MsSql::exec(stmt);
+      auto r = MsSql::exec(utf8ToGBK(stmt));
 
       if (r.affected_rows() >= 1) {
         ret["msg"] = "ok";
@@ -1299,7 +1304,7 @@ void User::blockChat(
   Json::Value ret;
 
   try {
-    auto r = MsSql::exec(stmt);
+    auto r = MsSql::exec(utf8ToGBK(stmt));
 
     if (r.affected_rows() >= 1) {
       ret["msg"] = "ok";
@@ -1343,7 +1348,7 @@ void User::blockUser(
   Json::Value ret;
 
   try {
-    auto r = MsSql::exec(stmt);
+    auto r = MsSql::exec(utf8ToGBK(stmt));
 
     if (r.affected_rows() >= 1) {
       ret["msg"] = "ok";
@@ -1389,7 +1394,7 @@ void User::blockIp(
   Json::Value ret;
 
   try {
-    auto r = MsSql::exec(stmt);
+    auto r = MsSql::exec(utf8ToGBK(stmt));
 
     if (r.affected_rows() >= 1) {
       ret["msg"] = "ok";
@@ -1417,7 +1422,7 @@ Json::Value User::getPermission(const std::string userNo) const {
   Json::Value ret = {};
 
   try {
-    auto r = MsSql::exec(stmt);
+    auto r = MsSql::exec(utf8ToGBK(stmt));
     r.next();
 
     if (r.rows() > 0) {
@@ -1426,7 +1431,7 @@ Json::Value User::getPermission(const std::string userNo) const {
           "WHERE id = '{}'",
           r.get<std::string>("permission", ""));
 
-      r = MsSql::exec(stmt);
+      r = MsSql::exec(utf8ToGBK(stmt));
       r.next();
 
       if (r.rows() > 0) {

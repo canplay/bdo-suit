@@ -54,32 +54,32 @@ void Status::overview(
 
     auto r1 = MsSql::exec(stmt1);
     r1.next();
-    info["account"] = r1.get<INT64>(0, 0);
+    info["account"] = r1.get<int64_t>(0, 0);
 
     auto r2 = MsSql::exec(stmt2);
     r2.next();
-    info["character"] = r2.get<INT64>(0, 0);
+    info["character"] = r2.get<int64_t>(0, 0);
 
     auto r3 = MsSql::exec(stmt3);
     r3.next();
-    info["guild"] = r3.get<INT64>(0, 0);
+    info["guild"] = r3.get<int64_t>(0, 0);
 
     auto r4 = MsSql::exec(stmt4);
     Json::Value online;
     while (r4.next()) {
       Json::Value server;
       server["date"] = r4.get<std::string>("_updatedDate", "");
-      server["world"] = r4.get<INT64>("_worldNo", 0);
-      server["server"] = r4.get<INT64>("_serverNo", 0);
-      server["loginning"] = r4.get<INT64>("_loginningUserCount", 0);
-      server["playing"] = r4.get<INT64>("_playingUserCount", 0);
+      server["world"] = r4.get<int64_t>("_worldNo", 0);
+      server["server"] = r4.get<int64_t>("_serverNo", 0);
+      server["loginning"] = r4.get<int64_t>("_loginningUserCount", 0);
+      server["playing"] = r4.get<int64_t>("_playingUserCount", 0);
       online.append(server);
     }
     info["online"] = online;
 
     auto r5 = MsSql::exec(stmt5);
     r5.next();
-    info["market"] = r5.get<INT64>(0, 0);
+    info["market"] = r5.get<int64_t>(0, 0);
 
     ret["msg"] = info;
     ret["status"] = 1;

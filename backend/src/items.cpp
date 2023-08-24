@@ -1,7 +1,9 @@
 #include "items.h"
 #include "mssql.h"
 #include "pch.h"
+#include "spdlog/spdlog.h"
 #include "utility.h"
+#include <stdint.h>
 
 namespace api {
 void Items::count(
@@ -15,8 +17,8 @@ void Items::count(
     return callback(HttpResponse::newHttpJsonResponse(ret));
   }
 
-  std::string stmt =
-      "SELECT COUNT(id) FROM [SA_BETA_WORLDDB_0002].[PaWebPublic].[items]";
+  std::string stmt = "SELECT COUNT(id) as [count] FROM "
+                     "[SA_BETA_WORLDDB_0002].[PaWebPublic].[items]";
 
   if ((*json)["filter"].asString() != "") {
     stmt = fmt::format("{} WHERE [name] LIKE N'%{}%'", stmt,
@@ -28,9 +30,9 @@ void Items::count(
   try {
     Json::Value info;
 
-    auto r = MsSql::exec(stmt);
+    auto r = MsSql::exec(utf8ToGBK(stmt));
     r.next();
-    ret["msg"] = r.get<INT64>(0, 0);
+    ret["msg"] = r.get<int64_t>("count");
     ret["status"] = 1;
   } catch (const std::exception &e) {
     spdlog::warn("items count error: {}", e.what());
@@ -81,7 +83,7 @@ void Items::info(
   try {
     Json::Value infos;
 
-    auto r = MsSql::exec(stmt);
+    auto r = MsSql::exec(utf8ToGBK(stmt));
 
     while (r.next()) {
       Json::Value info;

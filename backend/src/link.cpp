@@ -15,9 +15,9 @@ void Link::count(
   try {
     Json::Value info;
 
-    auto r = MsSql::exec(stmt);
+    auto r = MsSql::exec(utf8ToGBK(stmt));
     r.next();
-    ret["msg"] = r.get<INT64>(0, 0);
+    ret["msg"] = r.get<int64_t>(0, 0);
     ret["status"] = 1;
   } catch (const std::exception &e) {
     spdlog::warn("link count error: {}", e.what());
@@ -53,7 +53,7 @@ void Link::add(const HttpRequestPtr &req,
   Json::Value ret;
 
   try {
-    auto r = MsSql::exec(stmt);
+    auto r = MsSql::exec(utf8ToGBK(stmt));
 
     if (r.affected_rows() >= 1) {
       ret["msg"] = "ok";
@@ -96,7 +96,7 @@ void Link::update(
   Json::Value ret;
 
   try {
-    auto r = MsSql::exec(stmt);
+    auto r = MsSql::exec(utf8ToGBK(stmt));
 
     if (r.affected_rows() >= 1) {
       ret["msg"] = "ok";
@@ -147,7 +147,7 @@ void Link::info(const HttpRequestPtr &req,
   try {
     Json::Value infos;
 
-    auto r = MsSql::exec(stmt);
+    auto r = MsSql::exec(utf8ToGBK(stmt));
 
     while (r.next()) {
       Json::Value info;
