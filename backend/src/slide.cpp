@@ -45,7 +45,7 @@ void Slide::add(const HttpRequestPtr &req,
   auto stmt = fmt::format(
       "INSERT INTO [SA_BETA_WORLDDB_0002].[PaWebPublic].[slide] ([id], "
       "[title], [desc], [link], [create_date], [create_user], [update_date], "
-      "[update_user], [img]) VALUES ('{}', N'{}', N'{}', '{}', '{}', '{}', "
+      "[update_user], [img]) VALUES ('{}', '{}', '{}', '{}', '{}', '{}', "
       "'{}', '{}', '{}');",
       uuidSimple(), (*json)["title"].asString(), (*json)["desc"].asString(),
       (*json)["link"].asString(), timestamp, (*json)["create_user"].asString(),
@@ -89,7 +89,7 @@ void Slide::update(
 
   auto stmt = fmt::format(
       "UPDATE [SA_BETA_WORLDDB_0002].[PaWebPublic].[slide] SET [title] = "
-      "N'{}', [desc] = N'{}', [link] = '{}', [update_date] = '{}', "
+      "'{}', [desc] = '{}', [link] = '{}', [update_date] = '{}', "
       "[update_user] = '{}', [img] = '{}' WHERE [id] = '{}';",
       (*json)["title"].asString(), (*json)["desc"].asString(),
       (*json)["link"].asString(), timestamp, (*json)["update_user"].asString(),

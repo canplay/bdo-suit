@@ -21,7 +21,7 @@ void Items::count(
                      "[SA_BETA_WORLDDB_0002].[PaWebPublic].[items]";
 
   if ((*json)["filter"].asString() != "") {
-    stmt = fmt::format("{} WHERE [name] LIKE N'%{}%'", stmt,
+    stmt = fmt::format("{} WHERE [name] LIKE '%{}%'", stmt,
                        (*json)["filter"].asString());
   }
 
@@ -61,13 +61,13 @@ void Items::info(
       (*json)["maxPage"].asInt64(), (*json)["curPage"].asInt64());
 
   if ((*json)["filter"].asString() != "") {
-    stmt = fmt::format("{} WHERE [name] LIKE N'%{}%'", stmt,
+    stmt = fmt::format("{} WHERE [name] LIKE '%{}%'", stmt,
                        (*json)["filter"].asString());
   }
 
   if ((*json)["sortBy"].asString() != "") {
     stmt = fmt::format(
-        "{} ORDER BY [{}] DESC) AND [name] LIKE N'%{}%' ORDER BY [{}]", stmt,
+        "{} ORDER BY [{}] DESC) AND [name] LIKE '%{}%' ORDER BY [{}]", stmt,
         (*json)["sortBy"].asString(), (*json)["filter"].asString(),
         (*json)["sortBy"].asString());
 

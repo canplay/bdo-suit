@@ -45,7 +45,7 @@ void Link::add(const HttpRequestPtr &req,
   auto stmt = fmt::format(
       "INSERT INTO [SA_BETA_WORLDDB_0002].[PaWebPublic].[link] ([id], [title], "
       "[link], [create_date], [create_user],  [update_date], [update_user]) "
-      "VALUES ('{}', N'{}', '{}', '{}', '{}', '{}', '{}');",
+      "VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}');",
       uuidSimple(), (*json)["title"].asString(), (*json)["link"].asString(),
       timestamp, (*json)["create_user"].asString(), timestamp,
       (*json)["update_user"].asString());
@@ -87,7 +87,7 @@ void Link::update(
   auto timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(time));
 
   auto stmt = fmt::format(
-      "UPDATE [SA_BETA_WORLDDB_0002].[PaWebPublic].[link] SET [title] = N'{}', "
+      "UPDATE [SA_BETA_WORLDDB_0002].[PaWebPublic].[link] SET [title] = '{}', "
       "[link] = '{}', [update_date] = '{}', [update_user] = '{}' WHERE [id] = "
       "'{}';",
       (*json)["title"].asString(), (*json)["link"].asString(), timestamp,

@@ -98,7 +98,7 @@ void User::signup(
           "[_isAdultWorldUser], [_shutDownTime], [_atField], "
           "[_isCompleteTesterSubmit], [_isOtp], [_lastMacAddress], "
           "[_allCharacterTotalLevel], [_isAppliedNickNameChange]) VALUES('{}', "
-          "'1', N'{},{}', N'{}', "
+          "'1', '{},{}', '{}', "
           "0xF6ADBC1E77E92C0F1725B83DCFCFA139AD87EABCB262E1E3652B485F427961BDC5"
           "7382A8A729331B7FF8A7A90FFBFE80ED43EF1060FE5F7716266DC48227AED0, 0, "
           "'1900-01-01 00:00:00.000', 0, '{}', '{}', 0, '127.0.0.1', -1, 0, 0, "
@@ -526,17 +526,16 @@ void User::mail(const HttpRequestPtr &req,
         "([_registerDate], [_senderName], [_senderUserNo], [_receiverName], "
         "[_receiverUserNo], [_title], [_contents], [_mailType], [_variousNo], "
         "[_enchantLevel], [_itemCount], [_webItemType], [_chargeNo]) VALUES "
-        "('{}', N'系统管理员', 0, N'{}', {}, N系统管理员', N'系统管理员', 0, "
-        "{}, "
-        "{}, "
-        "{}, 0, '')",
+        "('{}', '系统管理员', 0, '{}', {}, '系统管理员', '系统管理员', "
+        "0, "
+        "{}, {}, {}, 0, '')",
         timestamp, (*json)["receiverName"].asString(),
         (*json)["receiverUserNo"].asInt64(), (*json)["variousNo"].asInt64(),
         (*json)["enchantLevel"].asInt64(), (*json)["itemCount"].asInt64());
   } else if (type == "clear") {
     stmt = fmt::format(
         "DELETE FROM [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblMail] WHERE "
-        "[_senderName] = N'系统管理员' AND [_receiverUserNo] = {}",
+        "[_senderName] = '系统管理员' AND [_receiverUserNo] = {}",
         (*json)["receiverUserNo"].asInt64());
   } else {
     ret["msg"] = "no method";
@@ -544,6 +543,8 @@ void User::mail(const HttpRequestPtr &req,
 
     return callback(HttpResponse::newHttpJsonResponse(ret));
   }
+
+  spdlog::warn(utf8ToGBK(stmt));
 
   try {
     auto r = MsSql::exec(utf8ToGBK(stmt));
@@ -610,7 +611,7 @@ void User::update(const HttpRequestPtr &req,
 
     auto stmt1 = fmt::format(
         "UPDATE [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblUserInformation] "
-        "SET [_userId] = N'{},{}', [_userNickname] = N'{}' WHERE [_userNo] = "
+        "SET [_userId] = '{},{}', [_userNickname] = '{}' WHERE [_userNo] = "
         "{}",
         (*json)["username"].asString(), (*json)["password"].asString(),
         (*json)["userNickname"].asString(), (*json)["userNo"].asInt64());
@@ -618,7 +619,7 @@ void User::update(const HttpRequestPtr &req,
     auto stmt2 = fmt::format(
         "UPDATE "
         "[SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblBriefUserInformation] SET "
-        "[_userId] = N'{},{}', [_userNickname] = N'{}' WHERE [_userNo] = {}",
+        "[_userId] = '{},{}', [_userNickname] = '{}' WHERE [_userNo] = {}",
         (*json)["username"].asString(), (*json)["password"].asString(),
         (*json)["userNickname"].asString(), (*json)["userNo"].asInt64());
 
@@ -747,7 +748,7 @@ void User::characterUpdate(
   auto stmt =
       fmt::format("SELECT COUNT(_characterNo) FROM "
                   "[SA_BETA_GAMEDB_0002].[PaGamePrivate].["
-                  "TblCharacterInformation] WHERE [_characterName] = N'{}'",
+                  "TblCharacterInformation] WHERE [_characterName] = '{}'",
                   (*json)["characterNameOld"].asString());
 
   try {
@@ -762,7 +763,7 @@ void User::characterUpdate(
       stmt = fmt::format(
           "UPDATE "
           "[SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblCharacterInformation] SET "
-          "[_characterName] = N'{}', [_currentPositionX] = {}, "
+          "[_characterName] = '{}', [_currentPositionX] = {}, "
           "[_currentPositionY] = {}, [_currentPositionZ] = {}, "
           "[_returnPositionX] = {}, [_returnPositionY] = {}, "
           "[_returnPositionZ] = {} WHERE [_characterNo] = {}",
@@ -838,7 +839,7 @@ void User::adminUpdate(
   try {
     auto stmt1 = fmt::format(
         "UPDATE [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblUserInformation] "
-        "SET [_isValid] = '{}', [_userId] = N'{},{}', [_userNickname] = N'{}', "
+        "SET [_isValid] = '{}', [_userId] = '{},{}', [_userNickname] = '{}', "
         "[_isPcRoom] = {}, [_membershipType] = {} WHERE [_userNo] = {}",
         (*json)["isValid"].asString(), (*json)["username"].asString(),
         (*json)["password"].asString(), (*json)["userNickname"].asString(),
@@ -848,7 +849,7 @@ void User::adminUpdate(
     auto stmt2 = fmt::format(
         "UPDATE "
         "[SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblBriefUserInformation] SET "
-        "[_userId] = N'{},{}', [_userNickname] = N'{}' WHERE [_userNo] = {}",
+        "[_userId] = '{},{}', [_userNickname] = '{}' WHERE [_userNo] = {}",
         (*json)["username"].asString(), (*json)["password"].asString(),
         (*json)["userNickname"].asString(), (*json)["userNo"].asInt64());
 
@@ -918,7 +919,7 @@ void User::adminCharacterUpdate(
 
   auto stmt = fmt::format(
       "UPDATE [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblCharacterInformation] "
-      "SET [_characterName] = N'{}', [_currentPositionX] = {}, "
+      "SET [_characterName] = '{}', [_currentPositionX] = {}, "
       "[_currentPositionY] = {}, [_currentPositionZ] = {}, [_returnPositionX] "
       "= {}, [_returnPositionY] = {}, [_returnPositionZ] = {}, [_level] = {}, "
       "[_experience] = {}, [_skillPointLevel] = {}, [_skillPointExperience] = "
@@ -1001,7 +1002,7 @@ void User::adminMail(
       "({}[_registerDate], [_senderName], [_senderUserNo], [_receiverName], "
       "[_receiverUserNo], [_title], [_contents], [_mailType], [_variousNo], "
       "[_enchantLevel], [_itemCount], [_webItemType], [_chargeNo]) VALUES "
-      "('{}', N'{}', {}, N'{}', {}, N'{}', N'{}', {}, {}, {}, {}, {}, ''",
+      "('{}', '{}', {}, '{}', {}, '{}', '{}', {}, {}, {}, {}, {}, ''",
       expirationDate_col, timestamp,
       (*json)["senderName"].asString() == "" ? "GM"
                                              : (*json)["senderName"].asString(),
@@ -1297,7 +1298,7 @@ void User::blockChat(
   auto stmt = fmt::format(
       "INSERT INTO [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblBlockedChat] "
       "([_registerDate], [_userNo], [_endDate], [_reasonMemo]) VALUES ('{}', "
-      "{}, '{}', N'{}')",
+      "{}, '{}', '{}')",
       timestamp, (*json)["userNo"].asInt64(), (*json)["endDate"].asString(),
       (*json)["reasonMemo"].asString());
 
@@ -1341,7 +1342,7 @@ void User::blockUser(
   auto stmt = fmt::format(
       "INSERT INTO [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblBlockedUser] "
       "([_registerDate], [_userNo], [_endDate], [_blockCode], "
-      "[_operationMemo]) VALUES ('{}', {}, '{}', {}, N'{}')",
+      "[_operationMemo]) VALUES ('{}', {}, '{}', {}, '{}')",
       timestamp, (*json)["userNo"].asInt64(), (*json)["endDate"].asString(),
       (*json)["blockCode"].asInt64(), (*json)["reasonMemo"].asString());
 
@@ -1385,8 +1386,8 @@ void User::blockIp(
   auto stmt = fmt::format(
       "INSERT INTO [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblBlockedIP] "
       "([_registerDate], [_startIP], [_bigintStartIP], [_endIP], "
-      "[_bigintEndIP], [_blockCode], [_operationMemo]) VALUES ('{}', N'{}', "
-      "{}, N'{}', {}, {}, N'{}')",
+      "[_bigintEndIP], [_blockCode], [_operationMemo]) VALUES ('{}', '{}', "
+      "{}, '{}', {}, {}, '{}')",
       timestamp, (*json)["startIP"].asString(), (*json)["intStartIP"].asInt64(),
       (*json)["endIP"].asString(), (*json)["intEndIP"].asInt64(),
       (*json)["blockCode"].asInt64(), (*json)["operationMemo"].asString());

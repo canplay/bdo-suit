@@ -38,6 +38,7 @@ target("backend")
     end
 
     if is_host("windows") then
+        set_encodings("utf-8")
         set_runtimes("MD")
         add_includedirs("F:/Code/vcpkg/installed/x64-windows/include/crashpad")
         add_syslinks("Advapi32", "odbc32")

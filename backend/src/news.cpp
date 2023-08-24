@@ -45,8 +45,8 @@ void News::add(const HttpRequestPtr &req,
   auto stmt = fmt::format(
       "INSERT INTO [SA_BETA_WORLDDB_0002].[PaWebPublic].[news] ([id], [title], "
       "[date], [author], [content], [create_date], [create_user], "
-      "[update_date], [update_user], [delete]) VALUES ('{}', N'{}', '{}', "
-      "N'{}', N'{}', '{}', '{}', '{}', '{}', 0);",
+      "[update_date], [update_user], [delete]) VALUES ('{}', '{}', '{}', "
+      "'{}', '{}', '{}', '{}', '{}', '{}', 0);",
       uuidSimple(), (*json)["title"].asString(), (*json)["date"].asString(),
       (*json)["author"].asString(), (*json)["content"].asString(), timestamp,
       (*json)["create_user"].asString(), timestamp,
@@ -89,8 +89,8 @@ void News::update(
   auto timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(time));
 
   auto stmt = fmt::format(
-      "UPDATE [SA_BETA_WORLDDB_0002].[PaWebPublic].[news] SET [title] = N'{}', "
-      "[date] = '{}', [author] = N'{}', [content] = N'{}', [update_date] = "
+      "UPDATE [SA_BETA_WORLDDB_0002].[PaWebPublic].[news] SET [title] = '{}', "
+      "[date] = '{}', [author] = '{}', [content] = '{}', [update_date] = "
       "'{}', [update_user] = '{}', [delete] = {} WHERE [id] = '{}'",
       (*json)["title"].asString(), (*json)["date"].asString(),
       (*json)["author"].asString(), (*json)["content"].asString(), timestamp,
